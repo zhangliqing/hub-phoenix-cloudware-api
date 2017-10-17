@@ -1,1 +1,4 @@
-# phoenix-cloudware-api
+#phoenix-cloudware-api
+npm install 
+
+supervisor --hamony index
