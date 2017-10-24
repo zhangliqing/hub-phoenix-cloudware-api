@@ -57,7 +57,7 @@ router.route('/volumes').post(function (req,res) {
 
 //启动云件
 //req.body: cloudware_type user_id
-//res: ws  service_id  cloudware_id  pulsar_id
+//res: ws  service_name instance_id service_id cloudware_id pulsar_id
 router.route('/services').post(function (req, res) {
   var serviceName = shortid.generate()
   serviceName = serviceName.replace('_', 'aa')
@@ -324,7 +324,7 @@ router.route('/services').post(function (req, res) {
             ws: 'ws://' + serviceName + '.ex-lab.org',
             service_name:serviceName,
             service_id:body.id,
-            cloudware_id: cloudwareId,
+            instance_id: cloudwareId,
             pulsar_id: pulsarId
           }))
         }, 3000)
