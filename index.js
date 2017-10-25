@@ -13,7 +13,7 @@ var app = express();
 var router = express.Router();
 var port = process.env.PORT || 8080;
 var verifyToken = function (req,res,next) {
-  if(req.headers.secret != 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MDU4MTM0NTd9.Ftw1yHeUrqdNvymFZcIpuEoS0RHBFZqu4MfUZON9Zm0'){
+  if(req.body.secret != 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MDU4MTM0NTd9.Ftw1yHeUrqdNvymFZcIpuEoS0RHBFZqu4MfUZON9Zm0'){
     res.send(401,'Authentication failed.');
     return;
   }
@@ -57,15 +57,13 @@ router.route('/volumes').post(function (req,res) {
 
 //启动云件
 //req.body: cloudware_type user_id
-//res: ws  service_name instance_id service_id cloudware_id pulsar_id
+//res: ws  service_name instance_id service_id pulsar_id
 router.route('/services').post(function (req, res) {
   var serviceName = shortid.generate()
   serviceName = serviceName.replace('_', 'aa')
   serviceName = serviceName.replace('-', 'bb')
   console.log('create service: ' + serviceName)
   var pulsarId=''
-  var cloudwareId=''
-
   //create service
   var data = {
     "scale": 1,
@@ -94,7 +92,7 @@ router.route('/services').post(function (req, res) {
       },
       "restartPolicy": {"name": "always"},
       "secrets": [],
-      "dataVolumes": ["/"+req.body.user_id+":/data"],
+      "dataVolumes": ["/"+req.body.user_id+":/root/Desktop/myFile"],
       "dataVolumesFrom": [],
       "dns": [],
       "dnsSearch": [],
@@ -173,6 +171,18 @@ router.route('/services').post(function (req, res) {
     "vip": null,
     "fqdn": null
   };
+  switch (req.body.cloudware_type) {
+    case 'Rstudio':
+      data.launchConfig.imageUuid = "docker:daocloud.io/guodong/rstudio"
+      break;
+    case 'Hadoop':
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v1"
+      data.launchConfig.entryPoint = ["startxfce4"]
+      break;
+    default:
+      data.launchConfig.imageUuid = "docker:daocloud.io/guodong/rstudio"
+      break;
+  }
   request.post({
     url: service.rancher.endpoint + '/projects/1a3504/service',
     json: data
@@ -188,7 +198,6 @@ router.route('/services').post(function (req, res) {
       }, function (err, httpResponse, body) {
         var parsed = JSON.parse(body);
         var xfce4Id = parsed.instanceIds[0]
-
         // start pulsar
         var data = {
           "instanceTriggeredStop": "stop",
@@ -203,7 +212,7 @@ router.route('/services').post(function (req, res) {
           "type": "container",
           "requestedHostId": "1h5",
           "secrets": [],
-          "dataVolumes": ["/"+req.body.user_id+":/data"],
+          "dataVolumes": ["/"+req.body.user_id+":/root/Desktop/myFile"],
           "dataVolumesFrom": [],
           "dns": [],
           "dnsSearch": [],
@@ -277,27 +286,6 @@ router.route('/services').post(function (req, res) {
         },function (err, httpResponse, pulsarBody) {
           pulsarId = pulsarBody.id
         })
-
-        // start cloudware
-        switch (req.body.cloudware_type) {
-          case 'rstudio':
-            data.imageUuid = "docker:daocloud.io/guodong/rstudio"
-            break;
-          case 'gedit':
-            data.imageUuid = "docker:cloudwarelabs/xfce4-pulsar-ide-gedit"
-            break;
-          default:
-            data.imageUuid = "docker:daocloud.io/guodong/rstudio"
-            break;
-        }
-        data.name = serviceName + '-cloudware'
-        data.command = null
-        request.post({
-          url: service.rancher.endpoint + '/projects/1a3504/container',
-          json: data
-        },function (err, httpResponse, cloudwareBody) {
-          cloudwareId = cloudwareBody.id
-        })
       })
     }, 2000)
 
@@ -324,7 +312,6 @@ router.route('/services').post(function (req, res) {
             ws: 'ws://' + serviceName + '.ex-lab.org',
             service_name:serviceName,
             service_id:body.id,
-            instance_id: cloudwareId,
             pulsar_id: pulsarId
           }))
         }, 3000)
@@ -334,7 +321,7 @@ router.route('/services').post(function (req, res) {
 })
 
 //删除云件
-//req.body: service_name service_id  cloudware_id  pulsar_id
+//req.body: service_name service_id pulsar_id
 router.route('/services').delete(function (req, res) {
   //delete lb rule
   rp({uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'})
@@ -353,13 +340,7 @@ router.route('/services').delete(function (req, res) {
             .then(function () {
               rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/containers/' + req.body.pulsar_id})
                 .then(function () {
-                  rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/containers/' + req.body.cloudware_id})
-                    .then(function () {
-                      res.send(200,'delete success.')
-                    })
-                    .catch(function () {
-                      res.send(500, 'delete cloudware container error.')
-                    })
+                  res.send(200,'delete success.')
                 })
                 .catch(function () {
                   res.send(500, 'delete pulsar container error.')
@@ -379,7 +360,7 @@ router.route('/services').delete(function (req, res) {
 })
 
 //开启云件对应terminal
-//req.header cloudware_id
+//req.header service_id
 router.route('/terminals').get(function (req,res) {
   var data = {
     attachStdin: true,
