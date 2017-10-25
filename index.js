@@ -69,6 +69,7 @@ router.route('/volumes').post(function (req,res) {
           "driver": "",
           "config": {}
         },
+        "cmd":["echo","1"],
         "dataVolumesFromLaunchConfigs": [],
         "imageUuid": "docker:busybox",
         "ports": [],
@@ -276,104 +277,116 @@ router.route('/services').post(function (req, res) {
       res.send(500, 'post to rancher error.')
       return;
     }
-    setTimeout(function () {
-      // get xfce4-min srvice container id
-      request.get({
-        url: service.rancher.endpoint + '/projects/1a3504/services/' + body.id
-      }, function (err, httpResponse, body) {
-        var parsed = JSON.parse(body);
-        var xfce4Id = parsed.instanceIds[0]
-        // start pulsar
-        var data = {
-          "instanceTriggeredStop": "stop",
-          "startOnCreate": true,
-          "publishAllPorts": false,
-          "privileged": false,
-          "stdinOpen": true,
-          "tty": true,
-          "readOnly": false,
-          "runInit": false,
-          "networkMode": "container",
-          "type": "container",
-          "requestedHostId": "1h5",
-          "secrets": [],
-          "dataVolumes": ["/"+req.body.user_id+":/root/Desktop/myFile"],
-          "dataVolumesFrom": [],
-          "dns": [],
-          "dnsSearch": [],
-          "capAdd": [],
-          "capDrop": [],
-          "devices": [],
-          "logConfig": {"driver": "", "config": {}},
-          "dataVolumesFromLaunchConfigs": [],
-          "imageUuid": "docker:cloudwarelabs/pulsar",
-          "ports": [],
-          "instanceLinks": {},
-          "labels": {
-            "container_type":"cloudware"
-          },
-          "name": serviceName + '-pulsar',
-          "networkContainerId": xfce4Id,
-          "command": ["pulsar"],
-          "count": null,
-          "createIndex": null,
-          "created": null,
-          "deploymentUnitUuid": null,
-          "description": null,
-          "externalId": null,
-          "firstRunning": null,
-          "healthState": null,
-          "hostname": null,
-          "kind": null,
-          "memoryReservation": null,
-          "milliCpuReservation": null,
-          "removed": null,
-          "startCount": null,
-          "uuid": null,
-          "volumeDriver": null,
-          "workingDir": null,
-          "user": null,
-          "domainName": null,
-          "memorySwap": null,
-          "memory": null,
-          "cpuSet": null,
-          "cpuShares": null,
-          "pidMode": null,
-          "blkioWeight": null,
-          "cgroupParent": null,
-          "usernsMode": null,
-          "pidsLimit": null,
-          "diskQuota": null,
-          "cpuCount": null,
-          "cpuPercent": null,
-          "ioMaximumIOps": null,
-          "ioMaximumBandwidth": null,
-          "cpuPeriod": null,
-          "cpuQuota": null,
-          "cpuSetMems": null,
-          "isolation": null,
-          "kernelMemory": null,
-          "memorySwappiness": null,
-          "shmSize": null,
-          "uts": null,
-          "ipcMode": null,
-          "stopSignal": null,
-          "oomScoreAdj": null,
-          "ip": null,
-          "ip6": null,
-          "healthInterval": null,
-          "healthTimeout": null,
-          "healthRetries": null
-        }
-        request.post({
-          url: service.rancher.endpoint + '/projects/1a3504/container',
-          json: data
-        },function (err, httpResponse, pulsarBody) {
-          pulsarId = pulsarBody.id
-        })
-      })
-    }, 2000)
 
+    var i = 0
+    var startService = function () {
+      if(i > 10){
+        res.send(500, 'post to rancher error.')
+        return
+      }
+      setTimeout(function () {
+        request.get({
+          url: service.rancher.endpoint + '/projects/1a3504/services/' + body.id
+        }, function (err, httpResponse, body) {
+          var parsed = JSON.parse(body);
+          if(parsed.instanceIds.length == 0){
+            startService()
+          }
+          else {
+            var xfce4Id = parsed.instanceIds[0]
+            var data = {
+              "instanceTriggeredStop": "stop",
+              "startOnCreate": true,
+              "publishAllPorts": false,
+              "privileged": false,
+              "stdinOpen": true,
+              "tty": true,
+              "readOnly": false,
+              "runInit": false,
+              "networkMode": "container",
+              "type": "container",
+              "requestedHostId": "1h5",
+              "secrets": [],
+              "dataVolumes": ["/"+req.body.user_id+":/root/Desktop/myFile"],
+              "dataVolumesFrom": [],
+              "dns": [],
+              "dnsSearch": [],
+              "capAdd": [],
+              "capDrop": [],
+              "devices": [],
+              "logConfig": {"driver": "", "config": {}},
+              "dataVolumesFromLaunchConfigs": [],
+              "imageUuid": "docker:cloudwarelabs/pulsar",
+              "ports": [],
+              "instanceLinks": {},
+              "labels": {
+                "container_type":"cloudware"
+              },
+              "name": serviceName + '-pulsar',
+              "networkContainerId": xfce4Id,
+              "command": ["pulsar"],
+              "count": null,
+              "createIndex": null,
+              "created": null,
+              "deploymentUnitUuid": null,
+              "description": null,
+              "externalId": null,
+              "firstRunning": null,
+              "healthState": null,
+              "hostname": null,
+              "kind": null,
+              "memoryReservation": null,
+              "milliCpuReservation": null,
+              "removed": null,
+              "startCount": null,
+              "uuid": null,
+              "volumeDriver": null,
+              "workingDir": null,
+              "user": null,
+              "domainName": null,
+              "memorySwap": null,
+              "memory": null,
+              "cpuSet": null,
+              "cpuShares": null,
+              "pidMode": null,
+              "blkioWeight": null,
+              "cgroupParent": null,
+              "usernsMode": null,
+              "pidsLimit": null,
+              "diskQuota": null,
+              "cpuCount": null,
+              "cpuPercent": null,
+              "ioMaximumIOps": null,
+              "ioMaximumBandwidth": null,
+              "cpuPeriod": null,
+              "cpuQuota": null,
+              "cpuSetMems": null,
+              "isolation": null,
+              "kernelMemory": null,
+              "memorySwappiness": null,
+              "shmSize": null,
+              "uts": null,
+              "ipcMode": null,
+              "stopSignal": null,
+              "oomScoreAdj": null,
+              "ip": null,
+              "ip6": null,
+              "healthInterval": null,
+              "healthTimeout": null,
+              "healthRetries": null
+            }
+            request.post({
+              url: service.rancher.endpoint + '/projects/1a3504/container',
+              json: data
+            },function (err, httpResponse, pulsarBody) {
+              pulsarId = pulsarBody.id
+            })
+          }
+        })
+      },1000)
+      i++
+    }
+    startService()
     request.get({
       url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'
     }, function (err, httpResponse, body1) {
