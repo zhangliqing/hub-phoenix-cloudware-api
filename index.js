@@ -57,7 +57,7 @@ router.route('/volumes').post(function (req,res) {
 
 //启动云件
 //req.body: cloudware_type user_id
-//res: ws  service_name instance_id service_id pulsar_id
+//res: ws service_name service_id pulsar_id
 router.route('/services').post(function (req, res) {
   var serviceName = shortid.generate()
   serviceName = serviceName.replace('_', 'aa')
@@ -172,10 +172,10 @@ router.route('/services').post(function (req, res) {
     "fqdn": null
   };
   switch (req.body.cloudware_type) {
-    case 'Rstudio':
+    case 'rstudio':
       data.launchConfig.imageUuid = "docker:daocloud.io/guodong/rstudio"
       break;
-    case 'Hadoop':
+    case 'hadoop':
       data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v1"
       data.launchConfig.entryPoint = ["startxfce4"]
       break;
