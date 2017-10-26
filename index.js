@@ -14,7 +14,7 @@ var router = express.Router();
 var port = process.env.PORT || 8080;
 var verifyToken = function (req,res,next) {
   if(req.body.secret != 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MDU4MTM0NTd9.Ftw1yHeUrqdNvymFZcIpuEoS0RHBFZqu4MfUZON9Zm0'){
-    res.send(401,'Authentication failed.');
+    res.send(401,JSON.stringify({errorCode:1,errorMessage:'Authentication failed.'}))
     return;
   }
   next();
@@ -129,15 +129,15 @@ router.route('/volumes').post(function (req,res) {
       setTimeout(function () {
         rp({method:'POST',uri:service.rancher.endpoint + '/projects/1a3504/container',body:tmpData,json:true})
           .then(function () {
-            res.send(201,'OK')
+            res.send(201,JSON.stringify({errorCode:0}))
           })
           .catch(function () {
-            res.send(500, 'post to rancher error.')
+            res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
           })
       },3000)
     })
     .catch(function () {
-      res.send(500, 'post to rancher error.')
+      res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
     })
 })
 
@@ -274,14 +274,14 @@ router.route('/services').post(function (req, res) {
     json: data
   }, function (err, httpResponse, body) {
     if (err) {
-      res.send(500, 'post to rancher error.')
+      res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
       return;
     }
 
     var i = 0
     var startService = function () {
       if(i > 10){
-        res.send(500, 'post to rancher error.')
+        res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
         return
       }
       setTimeout(function () {
@@ -407,6 +407,7 @@ router.route('/services').post(function (req, res) {
         // ensure pulsar created
         setTimeout(function () {
           res.send(JSON.stringify({
+            errorCode:0,
             ws: 'ws://' + serviceName + '.ex-lab.org',
             service_name:serviceName,
             service_id:body.id,
@@ -438,22 +439,23 @@ router.route('/services').delete(function (req, res) {
             .then(function () {
               rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/containers/' + req.body.pulsar_id})
                 .then(function () {
-                  res.send(200,'delete success.')
+                  res.send(200,JSON.stringify({errorCode:0}))
                 })
                 .catch(function () {
-                  res.send(500, 'delete pulsar container error.')
+                  res.send(500, JSON.stringify({errorCode:1,errorMessage:'delete pulsar container error.'}))
                 })
             })
             .catch(function () {
-              res.send(500, 'delete service error.')
+              res.send(500, JSON.stringify({errorCode:1,errorMessage:'delete service error.'}))
             })
         })
         .catch(function () {
-          res.send(500, 'delete loadbalance rule error.');
+          res.send(500, JSON.stringify({errorCode:1,errorMessage:'delete loadBalance rule error.'}))
+
         })
     })
     .catch(function (err) {
-      res.send(500, 'get loadbalancer rules error');
+      res.send(500, JSON.stringify({errorCode:1,errorMessage:'get loadBalancer rules error'}))
     })
 })
 
@@ -475,9 +477,9 @@ router.route('/terminals').get(function (req,res) {
     json:data
   },function (err,hr,body) {
     if(err){
-      res.send(500,'open terminal error.')
+      res.send(500, JSON.stringify({errorCode:1,errorMessage:'open terminal error.'}))
     }else {
-      res.send(200,{token:body.token})
+      res.send(200,JSON.stringify({errorCode:0,token:body.token}))
     }
   })
 })
