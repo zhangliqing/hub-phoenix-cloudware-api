@@ -69,7 +69,7 @@ router.route('/volumes').post(function (req,res) {
           "driver": "",
           "config": {}
         },
-        "cmd":["echo","1"],
+        //"cmd":["echo","1"],
         "dataVolumesFromLaunchConfigs": [],
         "imageUuid": "docker:busybox",
         "ports": [],
