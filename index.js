@@ -258,17 +258,17 @@ router.route('/services').post(function (req, res) {
     "fqdn": null
   };
   switch (req.body.cloudware_type) {
-    case 'rstudio':
-      data.launchConfig.imageUuid = "docker:daocloud.io/guodong/rstudio"
+    case 'python':
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v1.0"
       break;
     case 'hadoop':
       data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v1"
-      data.launchConfig.entryPoint = ["startxfce4"]
       break;
     default:
-      data.launchConfig.imageUuid = "docker:daocloud.io/guodong/rstudio"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v1.0"
       break;
   }
+  data.launchConfig.entryPoint = ["startxfce4"]
   request.post({
     url: service.rancher.endpoint + '/projects/1a3504/service',
     json: data
