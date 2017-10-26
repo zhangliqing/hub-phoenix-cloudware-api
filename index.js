@@ -35,6 +35,8 @@ router.use(verifyToken);
 //创建用户对应文件夹
 //req.body user_id
 router.route('/volumes').post(function (req,res) {
+  console.log('get res')
+  //res.send(201,{errorCode:0})
   var data = {
     "type":"volume",
     "driver":"rancher-nfs",
@@ -129,7 +131,7 @@ router.route('/volumes').post(function (req,res) {
       setTimeout(function () {
         rp({method:'POST',uri:service.rancher.endpoint + '/projects/1a3504/container',body:tmpData,json:true})
           .then(function () {
-            res.send(201,JSON.stringify({errorCode:0}))
+            res.send(201,{errorCode:0})
           })
           .catch(function () {
             res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
