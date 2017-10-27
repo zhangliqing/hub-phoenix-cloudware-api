@@ -35,12 +35,12 @@ router.use(verifyToken);
 //创建用户对应文件夹
 //req.body user_id
 router.route('/volumes').post(function (req,res) {
-  console.log('get res')
+  console.log(req)
   //res.send(201,{errorCode:0})
   var data = {
     "type":"volume",
     "driver":"rancher-nfs",
-    "name":req.body.user_id,
+    "name":req.body.userId,
     "driverOpts":{}
   }
   var openContainer = function (user_id) {
@@ -131,14 +131,19 @@ router.route('/volumes').post(function (req,res) {
       url:service.rancher.endpoint + '/projects/1a3504/container',
       json:tmpData
     })
+    console.log('create Container')
   }
 
   rp({method:'POST',uri:'http://117.50.1.134:8080/v2-beta/projects/1a3504/volume',body:data,json:true})
     .then(function () {
-      openContainer(req.body.user_id)
+      console.log('2. before exec openContainer')
+      openContainer(req.body.userId)
+      console.log('3. after exec openContainer')
       res.send(201,{errorCode:0})
     })
-    .catch(function () {
+    .catch(function (err) {
+      //console.log(err)
+      console.log('before send {errorCode:1,errorMessage:post to rancher error.')
       res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
     })
 })
