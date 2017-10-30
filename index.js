@@ -313,6 +313,7 @@ router.route('/services').post(function (req, res) {
               "networkMode": "container",
               "type": "container",
               "requestedHostId": "1h5",
+              "restartPolicy": {name: "always"},
               "secrets": [],
               "dataVolumes": ["/"+req.body.user_id+":/root/Desktop/myFile"],
               "dataVolumesFrom": [],
