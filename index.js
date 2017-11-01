@@ -428,14 +428,14 @@ router.route('/services').post(function (req, res) {
 })
 
 //删除云件
-//req.body: service_name service_id pulsar_id
+//req.body: serviceName serviceId pulsarId
 router.route('/services').delete(function (req, res) {
   //delete lb rule
   rp({uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'})
     .then(function (repos) {
       var proxyData = JSON.parse(repos)
       for(var i = 0; i<proxyData.lbConfig.portRules.length; i++){
-        if(proxyData.lbConfig.portRules[i].hostname!=null && proxyData.lbConfig.portRules[i].hostname.indexOf(req.body.service_name)!=-1){
+        if(proxyData.lbConfig.portRules[i].hostname!=null && proxyData.lbConfig.portRules[i].hostname.indexOf(req.body.serviceName)!=-1){
           proxyData.lbConfig.portRules.splice(i,1)
           break
         }
@@ -443,9 +443,9 @@ router.route('/services').delete(function (req, res) {
       rp({method:'PUT',uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',body:proxyData,json:true})
         .then(function () {
           //delete service and container
-          rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/services/' + req.body.service_id})
+          rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/services/' + req.body.serviceId})
             .then(function () {
-              rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/containers/' + req.body.pulsar_id})
+              rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/containers/' + req.body.pulsarId})
                 .then(function () {
                   res.send(200,JSON.stringify({errorCode:0}))
                 })
