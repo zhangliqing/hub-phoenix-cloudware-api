@@ -448,23 +448,23 @@ router.route('/homeworks').post(function (req, res) {
             .then(function () {
               rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/containers/' + req.body.pulsarId})
                 .then(function () {
-                  res.send(200,JSON.stringify({errorCode:0}))
+                  res.send(200,{errorCode:0})
                 })
                 .catch(function () {
-                  res.send(500, JSON.stringify({errorCode:1,errorMessage:'delete pulsar container error.'}))
+                  res.send(500, {errorCode:1,errorMessage:'delete pulsar container error.'})
                 })
             })
             .catch(function () {
-              res.send(500, JSON.stringify({errorCode:1,errorMessage:'delete service error.'}))
+              res.send(500, {errorCode:1,errorMessage:'delete service error.'})
             })
         })
         .catch(function () {
-          res.send(500, JSON.stringify({errorCode:1,errorMessage:'delete loadBalance rule error.'}))
+          res.send(500, {errorCode:1,errorMessage:'delete loadBalance rule error.'})
 
         })
     })
     .catch(function (err) {
-      res.send(500, JSON.stringify({errorCode:1,errorMessage:'get loadBalancer rules error'}))
+      res.send(500, {errorCode:1,errorMessage:'get loadBalancer rules error'})
     })
 })
 
