@@ -429,7 +429,7 @@ router.route('/services').post(function (req, res) {
 
 //删除云件
 //req.body: serviceName serviceId pulsarId
-router.route('/services').delete(function (req, res) {
+router.route('/homeworks').post(function (req, res) {
   console.log(req)
   //delete lb rule
   rp({uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'})
