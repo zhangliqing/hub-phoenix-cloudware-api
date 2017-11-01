@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use( bodyParser.json());
 app.use(cors())
 app.use('/', router);
-router.use(verifyToken);
+//router.use(verifyToken);
 
 // shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$-');
 // router.route('/token').get(function (req,res) {//登录时调用，获取token
@@ -35,8 +35,8 @@ router.use(verifyToken);
 //创建用户对应文件夹
 //req.body user_id
 router.route('/volumes').post(function (req,res) {
-  console.log(req)
-  //res.send(201,{errorCode:0})
+
+
   var data = {
     "type":"volume",
     "driver":"rancher-nfs",
@@ -430,6 +430,7 @@ router.route('/services').post(function (req, res) {
 //删除云件
 //req.body: serviceName serviceId pulsarId
 router.route('/services').delete(function (req, res) {
+  console.log(req)
   //delete lb rule
   rp({uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'})
     .then(function (repos) {
