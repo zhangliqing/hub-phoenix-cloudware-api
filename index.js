@@ -302,7 +302,7 @@ router.route('/services').post(function (req, res) {
           url: service.rancher.endpoint + '/projects/1a3504/services/' + body.id
         }, function (err, httpResponse, body) {
           var parsed = JSON.parse(body);
-          if(parsed.instanceIds.length == 0){
+          if(parsed.type == 'error'||parsed.instanceIds.length == 0){
             startService()
           }
           else {
@@ -398,7 +398,7 @@ router.route('/services').post(function (req, res) {
           }
         })
       },1000)
-      i++
+      i=i+1
     }
     startService()
     request.get({
