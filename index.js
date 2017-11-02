@@ -11,7 +11,7 @@ var cors = require('cors')
 
 var app = express();
 var router = express.Router();
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 8081;
 var verifyToken = function (req,res,next) {
   if(req.body.secret != 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MDU4MTM0NTd9.Ftw1yHeUrqdNvymFZcIpuEoS0RHBFZqu4MfUZON9Zm0'){
     res.send(401,JSON.stringify({errorCode:1,errorMessage:'Authentication failed.'}))
@@ -272,7 +272,7 @@ router.route('/services').post(function (req, res) {
       data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
       break;
     case 'rstudio':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v2.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v3.0"
       break;
     case 'hadoop':
       data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v2.0"
