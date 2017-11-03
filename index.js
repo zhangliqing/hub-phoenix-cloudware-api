@@ -35,6 +35,7 @@ app.use('/', router);
 //创建用户对应文件夹
 //req.body user_id
 router.route('/volumes').post(function (req,res) {
+  res.send(201,{errorCode:0})
   // var data = {
   //   "type":"volume",
   //   "driver":"rancher-nfs",
