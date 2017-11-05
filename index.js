@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use( bodyParser.json());
 app.use(cors())
 app.use('/', router);
-//router.use(verifyToken);
+router.use(verifyToken);
 
 // shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$-');
 // router.route('/token').get(function (req,res) {//登录时调用，获取token
@@ -35,6 +35,7 @@ app.use('/', router);
 //创建用户对应文件夹
 //req.body user_id
 router.route('/volumes').post(function (req,res) {
+  console.log('recive post to /volumes')
   var data = {
     "type":"volume",
     "driver":"rancher-nfs",
@@ -129,19 +130,16 @@ router.route('/volumes').post(function (req,res) {
       url:service.rancher.endpoint + '/projects/1a3504/container',
       json:tmpData
     })
-    console.log('create Container')
   }
 
   rp({method:'POST',uri:'http://117.50.1.134:8080/v2-beta/projects/1a3504/volume',body:data,json:true})
     .then(function () {
-      console.log('2. before exec openContainer')
       openContainer(req.body.userId)
-      console.log('3. after exec openContainer')
+      console.log('create volume success')
       res.send(201,{errorCode:0})
     })
     .catch(function (err) {
-      //console.log(err)
-      console.log('before send {errorCode:1,errorMessage:post to rancher error.')
+      console.log('create volume fialed')
       res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
     })
 })
@@ -150,10 +148,10 @@ router.route('/volumes').post(function (req,res) {
 //req.body: cloudware_type user_id
 //res: ws service_name service_id pulsar_id
 router.route('/services').post(function (req, res) {
+  console.log('recive post to /service')
   var serviceName = shortid.generate()
   serviceName = serviceName.replace('_', 'aa')
   serviceName = serviceName.replace('-', 'bb')
-  console.log('create service: ' + serviceName)
   var pulsarId=''
   //create service
   var data = {
@@ -288,7 +286,7 @@ router.route('/services').post(function (req, res) {
       res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
       return;
     }
-
+    console.log('create service successfully')
     var i = 0
     var startService = function () {
       if(i > 10){
@@ -392,6 +390,7 @@ router.route('/services').post(function (req, res) {
               json: data
             },function (err, httpResponse, pulsarBody) {
               pulsarId = pulsarBody.id
+              console.log('create pulsar successfully')
             })
           }
         })
@@ -434,8 +433,8 @@ router.route('/services').post(function (req, res) {
 //删除云件
 //req.body: serviceName serviceId pulsarId
 router.route('/homeworks').post(function (req, res) {
-  console.log(req)
   //delete lb rule
+  console.log('recive post to /homeworks')
   rp({uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'})
     .then(function (repos) {
       var proxyData = JSON.parse(repos)
