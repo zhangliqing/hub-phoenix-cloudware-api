@@ -272,7 +272,7 @@ router.route('/services').post(function (req, res) {
       data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v3.0"
       break;
     case 'hadoop':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v2.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v3.0"
       break;
     default:
       data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
@@ -292,6 +292,7 @@ router.route('/services').post(function (req, res) {
     var startService = function () {
       if(i > 10){
         res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
+
       }else {
         setTimeout(function () {
           request.get({
@@ -391,35 +392,6 @@ router.route('/services').post(function (req, res) {
               },function (err, httpResponse, pulsarBody) {
                 pulsarId = pulsarBody.id
                 console.log('create pulsar successfully')
-                request.get({
-                  url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'
-                }, function (err, httpResponse, body1) {
-                  var proxyData = JSON.parse(body1)
-                  proxyData.lbConfig.portRules.push({
-                    "protocol": "http",
-                    "type": "portRule",
-                    "hostname": serviceName + ".ex-lab.org",
-                    "priority": 12,
-                    "serviceId": body.id,
-                    "sourcePort": 80,
-                    "targetPort": 5678
-                  })
-                  request.put({
-                    url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',
-                    json: proxyData
-                  }, function (err, httpResponse, body2) {
-                    // ensure pulsar created
-                    setTimeout(function () {
-                      res.send(JSON.stringify({
-                        errorCode:0,
-                        ws: 'ws://' + serviceName + '.ex-lab.org',
-                        service_name:serviceName,
-                        service_id:body.id,
-                        pulsar_id: pulsarId
-                      }))
-                    }, 3000)
-                  })
-                })
               })
             }
           })
@@ -428,6 +400,35 @@ router.route('/services').post(function (req, res) {
       }
     }
     startService()
+    request.get({
+      url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'
+    }, function (err, httpResponse, body1) {
+      var proxyData = JSON.parse(body1)
+      proxyData.lbConfig.portRules.push({
+        "protocol": "http",
+        "type": "portRule",
+        "hostname": serviceName + ".ex-lab.org",
+        "priority": 12,
+        "serviceId": body.id,
+        "sourcePort": 80,
+        "targetPort": 5678
+      })
+      request.put({
+        url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',
+        json: proxyData
+      }, function (err, httpResponse, body2) {
+        // ensure pulsar created
+        setTimeout(function () {
+          res.send(JSON.stringify({
+            errorCode:0,
+            ws: 'ws://' + serviceName + '.ex-lab.org',
+            service_name:serviceName,
+            service_id:body.id,
+            pulsar_id: pulsarId
+          }))
+        }, 3000)
+      })
+    })
   });
 })
 
