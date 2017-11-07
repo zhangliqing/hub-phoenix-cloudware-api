@@ -25,6 +25,7 @@ app.use( bodyParser.json());
 app.use(cors())
 app.use('/', router);
 router.use(verifyToken);
+////ddsgdh
 
 // shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$-');
 // router.route('/token').get(function (req,res) {//登录时调用，获取token
