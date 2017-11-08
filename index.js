@@ -156,6 +156,9 @@ router.route('/services').post(function (req, res) {
   var pulsarId=''
 
   //create service
+
+  console.log(service.rancher.stackid)
+  console.log(service.rancher.env)
   var data = {
     "scale": 1,
     "assignServiceIpAddress": false,
