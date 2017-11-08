@@ -149,6 +149,7 @@ router.route('/volumes').post(function (req, res) {
 //req.body: cloudware_type user_id
 //res: ws service_name service_id pulsar_id
 router.route('/services').post(function (req, res) {
+  var sended = 0
   console.log('recive post to /service')
   var serviceName = shortid.generate()
   serviceName = serviceName.replace('_', 'aa')
@@ -407,13 +408,17 @@ router.route('/services').post(function (req, res) {
                   json: data
                 }, function (err, httpResponse, pulsarBody) {
                   pulsarId = pulsarBody.id
-                  res.send(200,JSON.stringify({
-                    errorCode: 0,
-                    ws: service.rancher.wsaddr + '/' + serviceName,
-                    service_name: serviceName,
-                    service_id: body.id,
-                    pulsar_id: pulsarId
-                  }))
+                  if (sended == 0) {
+                    res.send(200,JSON.stringify({
+                      errorCode: 0,
+                      ws: service.rancher.wsaddr + '/' + serviceName,
+                      service_name: serviceName,
+                      service_id: body.id,
+                      pulsar_id: pulsarId
+                    }))
+                    sended = 1
+                  }
+
                   clearInterval(Int)
                   console.log('create pulsar successfully')
                 })
