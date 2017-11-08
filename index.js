@@ -1,30 +1,30 @@
 /**
  * Created by zhangliqing on 2017/9/15.
  */
-var express = require('express');
-var bodyParser = require('body-parser');
-var request = require('request');
-var rp = require('request-promise');
-var service = require('./service.local');
-var shortid = require('shortid');
+var express = require('express')
+var bodyParser = require('body-parser')
+var request = require('request')
+var rp = require('request-promise')
+var service = require('./service.local')
+var shortid = require('shortid')
 var cors = require('cors')
 
-var app = express();
-var router = express.Router();
-var port = process.env.PORT || 8080;
-var verifyToken = function (req,res,next) {
-  if(req.body.secret != 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MDU4MTM0NTd9.Ftw1yHeUrqdNvymFZcIpuEoS0RHBFZqu4MfUZON9Zm0'){
-    res.send(401,JSON.stringify({errorCode:1,errorMessage:'Authentication failed.'}))
-    return;
+var app = express()
+var router = express.Router()
+var port = process.env.PORT || 8080
+var verifyToken = function(req, res, next) {
+  if (req.body.secret != 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MDU4MTM0NTd9.Ftw1yHeUrqdNvymFZcIpuEoS0RHBFZqu4MfUZON9Zm0') {
+    res.send(401, JSON.stringify({errorCode: 1, errorMessage: 'Authentication failed.'}))
+    return
   }
-  next();
+  next()
 }
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.use( bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json())
 app.use(cors())
-app.use('/', router);
-router.use(verifyToken);
+app.use('/', router)
+router.use(verifyToken)
 
 console.log(service.rancher.stackid)
 console.log(service.rancher.env)
@@ -38,15 +38,15 @@ console.log(service.rancher.env)
 
 //创建用户对应文件夹
 //req.body user_id
-router.route('/volumes').post(function (req,res) {
+router.route('/volumes').post(function(req, res) {
   console.log('recive post to /volumes')
   var data = {
-    "type":"volume",
-    "driver":"rancher-nfs",
-    "name":req.body.userId,
-    "driverOpts":{}
+    "type": "volume",
+    "driver": "rancher-nfs",
+    "name": req.body.userId,
+    "driverOpts": {}
   }
-  var openContainer = function (user_id) {
+  var openContainer = function(user_id) {
     var tmpData = {
       "instanceTriggeredStop": "stop",
       "startOnCreate": true,
@@ -61,7 +61,7 @@ router.route('/volumes').post(function (req,res) {
       "requestedHostId": "1h5",
       "secrets": [],
       "dataVolumes": [
-        user_id+":/data"
+        user_id + ":/data"
       ],
       "dataVolumesFrom": [],
       "dns": [],
@@ -78,8 +78,8 @@ router.route('/volumes').post(function (req,res) {
       "imageUuid": "docker:busybox",
       "ports": [],
       "instanceLinks": {},
-      "labels": {"container_type":"cloudware"},
-      "name": "test"+user_id,
+      "labels": {"container_type": "cloudware"},
+      "name": "test" + user_id,
       "count": null,
       "createIndex": null,
       "created": null,
@@ -131,35 +131,39 @@ router.route('/volumes').post(function (req,res) {
       "healthRetries": null
     }
     request.post({
-      url:service.rancher.endpoint + '/projects/1a3504/container',
-      json:tmpData
+      url: service.rancher.endpoint + '/projects/1a3504/container',
+      json: tmpData
     })
   }
 
-  rp({method:'POST',uri:service.rancher.endpoint + '/projects/' + service.rancher.env + '/volume',body:data,json:true})
-    .then(function () {
+  rp({
+    method: 'POST',
+    uri: service.rancher.endpoint + '/projects/' + service.rancher.env + '/volume',
+    body: data,
+    json: true
+  })
+    .then(function() {
       openContainer(req.body.userId)
       console.log('create volume success')
-      res.send(201,{errorCode:0})
+      res.send(201, {errorCode: 0})
     })
-    .catch(function (err) {
+    .catch(function(err) {
       console.log('create volume fialed')
-      res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
+      res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
     })
 })
 
 //启动云件
 //req.body: cloudware_type user_id
 //res: ws service_name service_id pulsar_id
-router.route('/services').post(function (req, res) {
+router.route('/services').post(function(req, res) {
   console.log('recive post to /service')
   var serviceName = shortid.generate()
   serviceName = serviceName.replace('_', 'aa')
   serviceName = serviceName.replace('-', 'bb')
-  var pulsarId=''
+  var pulsarId = ''
 
   //create service
-
 
   var data = {
     "scale": 1,
@@ -187,7 +191,7 @@ router.route('/services').post(function (req, res) {
       },
       "restartPolicy": {"name": "always"},
       "secrets": [],
-      "dataVolumes": [req.body.user_id+":/root/Desktop/myFile","dataset:/data:ro"],
+      "dataVolumes": [req.body.user_id + ":/root/Desktop/myFile", "dataset:/data:ro"],
       "dataVolumesFrom": [],
       "dns": [],
       "dnsSearch": [],
@@ -265,48 +269,47 @@ router.route('/services').post(function (req, res) {
     "uuid": null,
     "vip": null,
     "fqdn": null
-  };
+  }
   switch (req.body.cloudware_type) {
     case 'python':
       data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v1.0"
-      break;
+      break
     case 'base':
       data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v1.0"
-      break;
+      break
     case 'rstudio':
       data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v1.0"
-      break;
+      break
     case 'hadoop':
       data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v1.0"
-      break;
+      break
     default:
       data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v1.0"
-      break;
+      break
   }
   data.launchConfig.entryPoint = ["startxfce4"]
   request.post({
-    url: service.rancher.endpoint + '/projects/' + service.rancher.env +'/service',
+    url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/service',
     json: data
-  }, function (err, httpResponse, body) {
+  }, function(err, httpResponse, body) {
     if (err) {
-      res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
-      return;
+      res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
+      return
     }
     console.log('create service successfully')
 
-
     var i = 0
-    var startService = function () {
-      if(i > 10){
-        res.send(500, JSON.stringify({errorCode:1,errorMessage:'post to rancher error.'}))
+    var startService = function() {
+      if (i > 10) {
+        res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
 
-      }else {
-        setTimeout(function () {
+      } else {
+        setTimeout(function() {
           request.get({
             url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + body.id
-          }, function (err, httpResponse, body) {
-            var parsed = JSON.parse(body);
-            if(parsed.type == 'error'|| !parsed.instanceIds || parsed.instanceIds.length == 0){
+          }, function(err, httpResponse, body) {
+            var parsed = JSON.parse(body)
+            if (parsed.type == 'error' || !parsed.instanceIds || parsed.instanceIds.length == 0) {
               startService()
             }
             else {
@@ -328,7 +331,7 @@ router.route('/services').post(function (req, res) {
                   "requestedHostId": hostId,
                   "restartPolicy": {name: "always"},
                   "secrets": [],
-                  "dataVolumes": ["/"+req.body.user_id+":/root/Desktop/myFile"],
+                  "dataVolumes": ["/" + req.body.user_id + ":/root/Desktop/myFile"],
                   "dataVolumesFrom": [],
                   "dns": [],
                   "dnsSearch": [],
@@ -341,7 +344,7 @@ router.route('/services').post(function (req, res) {
                   "ports": [],
                   "instanceLinks": {},
                   "labels": {
-                    "container_type":"cloudware"
+                    "container_type": "cloudware"
                   },
                   "name": serviceName + '-pulsar',
                   "networkContainerId": xfce4Id,
@@ -399,28 +402,30 @@ router.route('/services').post(function (req, res) {
                 request.post({
                   url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/container',
                   json: data
-                },function (err, httpResponse, pulsarBody) {
+                }, function(err, httpResponse, pulsarBody) {
                   pulsarId = pulsarBody.id
                   console.log('create pulsar successfully')
                 })
               })
 
-
             }
           })
-        },1000)
-        i=i+1
+        }, 1000)
+        i = i + 1
       }
     }
     startService()
     request.get({
-      url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/'+service.rancher.lbid
-    }, function (err, httpResponse, body1) {
+      url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid
+    }, function(err, httpResponse, body1) {
       var proxyData = JSON.parse(body1)
       proxyData.lbConfig.portRules.push({
+        "backendName": null,
+        "hostname": null,
+        "selector": null,
         "protocol": "http",
         "type": "portRule",
-        "path":"/"+serviceName,
+        "path": "/" + serviceName,
         "priority": 12,
         "serviceId": body.id,
         "sourcePort": 83,
@@ -429,66 +434,77 @@ router.route('/services').post(function (req, res) {
       request.put({
         url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
         json: proxyData
-      }, function (err, httpResponse, body2) {
+      }, function(err, httpResponse, body2) {
         // ensure pulsar created
-        setTimeout(function () {
+        setTimeout(function() {
           res.send(JSON.stringify({
-            errorCode:0,
-            ws: service.rancher.wsprefix+'/'+serviceName,
-            service_name:serviceName,
-            service_id:body.id,
+            errorCode: 0,
+            ws: service.rancher.wsprefix + '/' + serviceName,
+            service_name: serviceName,
+            service_id: body.id,
             pulsar_id: pulsarId
           }))
         }, 3000)
       })
     })
-  });
+  })
 })
 
 //删除云件
 //req.body: serviceName serviceId pulsarId
-router.route('/homeworks').post(function (req, res) {
+router.route('/homeworks').post(function(req, res) {
   //delete lb rule
   console.log('recive post to /homeworks')
-  rp({uri:service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid})
-    .then(function (repos) {
+  rp({uri: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid})
+    .then(function(repos) {
       var proxyData = JSON.parse(repos)
-      for(var i = 0; i<proxyData.lbConfig.portRules.length; i++){
-        if(proxyData.lbConfig.portRules[i].path!=null && proxyData.lbConfig.portRules[i].path.indexOf(req.body.serviceName)!=-1){
-          proxyData.lbConfig.portRules.splice(i,1)
+      for (var i = 0; i < proxyData.lbConfig.portRules.length; i++) {
+        if (proxyData.lbConfig.portRules[i].path != null && proxyData.lbConfig.portRules[i].path.indexOf(req.body.serviceName) != -1) {
+          proxyData.lbConfig.portRules.splice(i, 1)
           break
         }
       }
-      rp({method:'PUT',uri:service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/'+ service.rancher.lbid,body:proxyData,json:true})
-        .then(function () {
+      rp({
+        method: 'PUT',
+        uri: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
+        body: proxyData,
+        json: true
+      })
+        .then(function() {
           //delete service and container
-          rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/'+ service.rancher.env + '/services/' + req.body.serviceId})
-            .then(function () {
-              rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/'+ service.rancher.env + '/containers/' + req.body.pulsarId})
-                .then(function () {
-                  res.send(200,{errorCode:0})
+          rp({
+            method: 'DELETE',
+            uri: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + req.body.serviceId
+          })
+            .then(function() {
+              rp({
+                method: 'DELETE',
+                uri: service.rancher.endpoint + '/projects/' + service.rancher.env + '/containers/' + req.body.pulsarId
+              })
+                .then(function() {
+                  res.send(200, {errorCode: 0})
                 })
-                .catch(function () {
-                  res.send(500, {errorCode:1,errorMessage:'delete pulsar container error.'})
+                .catch(function() {
+                  res.send(500, {errorCode: 1, errorMessage: 'delete pulsar container error.'})
                 })
             })
-            .catch(function () {
-              res.send(500, {errorCode:1,errorMessage:'delete service error.'})
+            .catch(function() {
+              res.send(500, {errorCode: 1, errorMessage: 'delete service error.'})
             })
         })
-        .catch(function () {
-          res.send(500, {errorCode:1,errorMessage:'delete loadBalance rule error.'})
+        .catch(function() {
+          res.send(500, {errorCode: 1, errorMessage: 'delete loadBalance rule error.'})
 
         })
     })
-    .catch(function (err) {
-      res.send(500, {errorCode:1,errorMessage:'get loadBalancer rules error'})
+    .catch(function(err) {
+      res.send(500, {errorCode: 1, errorMessage: 'get loadBalancer rules error'})
     })
 })
 
 //开启云件对应terminal
 //req.header service_id
-router.route('/terminals').get(function (req,res) {
+router.route('/terminals').get(function(req, res) {
   var data = {
     attachStdin: true,
     attachStdout: true,
@@ -500,16 +516,16 @@ router.route('/terminals').get(function (req,res) {
     ]
   }
   request.post({
-    url:service.rancher.endpoint + '/projects/'+ service.rancher.env +'/containers/'+req.headers.cloudware_id+'/?action=execute',
-    json:data
-  },function (err,hr,body) {
-    if(err){
-      res.send(500, JSON.stringify({errorCode:1,errorMessage:'open terminal error.'}))
-    }else {
-      res.send(200,JSON.stringify({errorCode:0,token:body.token}))
+    url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/containers/' + req.headers.cloudware_id + '/?action=execute',
+    json: data
+  }, function(err, hr, body) {
+    if (err) {
+      res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'open terminal error.'}))
+    } else {
+      res.send(200, JSON.stringify({errorCode: 0, token: body.token}))
     }
   })
 })
 
-app.listen(port);
-console.log('listening on port ' + port);
+app.listen(port)
+console.log('listening on port ' + port)
