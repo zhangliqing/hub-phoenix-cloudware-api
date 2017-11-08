@@ -402,7 +402,7 @@ router.route('/services').post(function (req, res) {
     }
     startService()
     request.get({
-      url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'
+      url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s1050'
     }, function (err, httpResponse, body1) {
       var proxyData = JSON.parse(body1)
       proxyData.lbConfig.portRules.push({
@@ -415,7 +415,7 @@ router.route('/services').post(function (req, res) {
         "targetPort": 5678
       })
       request.put({
-        url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',
+        url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s1050',
         json: proxyData
       }, function (err, httpResponse, body2) {
         // ensure pulsar created
