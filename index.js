@@ -5,7 +5,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
 var rp = require('request-promise');
-var service = require('./service');
+var service = require('./service.local');
 var shortid = require('shortid');
 var cors = require('cors')
 
@@ -25,6 +25,9 @@ app.use( bodyParser.json());
 app.use(cors())
 app.use('/', router);
 router.use(verifyToken);
+
+console.log(service.rancher.stackid)
+console.log(service.rancher.env)
 ////ddsgdh
 
 // shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$-');
@@ -157,8 +160,7 @@ router.route('/services').post(function (req, res) {
 
   //create service
 
-  console.log(service.rancher.stackid)
-  console.log(service.rancher.env)
+
   var data = {
     "scale": 1,
     "assignServiceIpAddress": false,
