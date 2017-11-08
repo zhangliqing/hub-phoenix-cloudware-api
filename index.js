@@ -431,7 +431,7 @@ router.route('/services').post(function(req, res) {
         "sourcePort": 83,
         "targetPort": 5678
       })
-      delete proxyData.ports
+      proxyData.launchConfig.ports.push("83:83/tcp")
       request.put({
         url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
         json: proxyData
