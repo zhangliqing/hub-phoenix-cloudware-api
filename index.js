@@ -306,7 +306,7 @@ router.route('/services').post(function (req, res) {
             url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + body.id
           }, function (err, httpResponse, body) {
             var parsed = JSON.parse(body);
-            if(parsed.type == 'error'||parsed.instanceIds.length == 0){
+            if(parsed.type == 'error'|| !parsed.instanceIds || parsed.instanceIds.length == 0){
               startService()
             }
             else {
