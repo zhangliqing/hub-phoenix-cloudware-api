@@ -5,13 +5,13 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
 var rp = require('request-promise');
-var service = require('./service.local');
+var service = require('./service');
 var shortid = require('shortid');
 var cors = require('cors')
 
 var app = express();
 var router = express.Router();
-var port = process.env.PORT || 8081;
+var port = process.env.PORT || 8080;
 var verifyToken = function (req,res,next) {
   if(req.body.secret != 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MDU4MTM0NTd9.Ftw1yHeUrqdNvymFZcIpuEoS0RHBFZqu4MfUZON9Zm0'){
     res.send(401,JSON.stringify({errorCode:1,errorMessage:'Authentication failed.'}))
@@ -133,7 +133,7 @@ router.route('/volumes').post(function (req,res) {
     })
   }
 
-  rp({method:'POST',uri:'http://117.50.1.134:8080/v2-beta/projects/1a3504/volume',body:data,json:true})
+  rp({method:'POST',uri:service.rancher.endpoint + '/projects/' + service.rancher.env + '/volume',body:data,json:true})
     .then(function () {
       openContainer(req.body.userId)
       console.log('create volume success')
@@ -161,7 +161,7 @@ router.route('/services').post(function (req, res) {
     "assignServiceIpAddress": false,
     "startOnCreate": true,
     "type": "service",
-    "stackId": "1st15",
+    "stackId": service.rancher.stackid,
     "launchConfig": {
       //"environment": {"DISPLAY": ":0"},
       //"command": "startxfce4",
@@ -178,12 +178,11 @@ router.route('/services').post(function (req, res) {
       "vcpu": 1,
       "type": "launchConfig",
       "labels": {
-        //"io.rancher.container.pull_image": "always",
         "io.rancher.scheduler.affinity:host_label": "cloudware=true"
       },
       "restartPolicy": {"name": "always"},
       "secrets": [],
-      "dataVolumes": [req.body.user_id+":/root/Desktop/myFile"],
+      "dataVolumes": [req.body.user_id+":/root/Desktop/myFile","dataset:/data:ro"],
       "dataVolumesFrom": [],
       "dns": [],
       "dnsSearch": [],
@@ -192,7 +191,7 @@ router.route('/services').post(function (req, res) {
       "devices": [],
       "logConfig": {"driver": "", "config": {}},
       "dataVolumesFromLaunchConfigs": [],
-      "imageUuid": "docker:cloudwarelabs/xfce4-min",
+      "imageUuid": "docker:cloudwarelabs/base",
       "ports": [],
       "blkioWeight": null,
       "cgroupParent": null,
@@ -264,24 +263,24 @@ router.route('/services').post(function (req, res) {
   };
   switch (req.body.cloudware_type) {
     case 'python':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v2.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v1.0"
       break;
     case 'base':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v1.0"
       break;
     case 'rstudio':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v3.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v1.0"
       break;
     case 'hadoop':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v3.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v1.0"
       break;
     default:
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v1.0"
       break;
   }
   data.launchConfig.entryPoint = ["startxfce4"]
   request.post({
-    url: service.rancher.endpoint + '/projects/1a3504/service',
+    url: service.rancher.endpoint + '/projects/' + service.rancher.env +'/service',
     json: data
   }, function (err, httpResponse, body) {
     if (err) {
@@ -289,6 +288,8 @@ router.route('/services').post(function (req, res) {
       return;
     }
     console.log('create service successfully')
+
+
     var i = 0
     var startService = function () {
       if(i > 10){
@@ -297,7 +298,7 @@ router.route('/services').post(function (req, res) {
       }else {
         setTimeout(function () {
           request.get({
-            url: service.rancher.endpoint + '/projects/1a3504/services/' + body.id
+            url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + body.id
           }, function (err, httpResponse, body) {
             var parsed = JSON.parse(body);
             if(parsed.type == 'error'||parsed.instanceIds.length == 0){
@@ -305,95 +306,101 @@ router.route('/services').post(function (req, res) {
             }
             else {
               var xfce4Id = parsed.instanceIds[0]
-              var data = {
-                "instanceTriggeredStop": "stop",
-                "startOnCreate": true,
-                "publishAllPorts": false,
-                "privileged": false,
-                "stdinOpen": true,
-                "tty": true,
-                "readOnly": false,
-                "runInit": false,
-                "networkMode": "container",
-                "type": "container",
-                "requestedHostId": "1h5",
-                "restartPolicy": {name: "always"},
-                "secrets": [],
-                "dataVolumes": ["/"+req.body.user_id+":/root/Desktop/myFile"],
-                "dataVolumesFrom": [],
-                "dns": [],
-                "dnsSearch": [],
-                "capAdd": [],
-                "capDrop": [],
-                "devices": [],
-                "logConfig": {"driver": "", "config": {}},
-                "dataVolumesFromLaunchConfigs": [],
-                "imageUuid": "docker:cloudwarelabs/pulsar",
-                "ports": [],
-                "instanceLinks": {},
-                "labels": {
-                  "container_type":"cloudware"
-                },
-                "name": serviceName + '-pulsar',
-                "networkContainerId": xfce4Id,
-                "command": ["pulsar"],
-                "count": null,
-                "createIndex": null,
-                "created": null,
-                "deploymentUnitUuid": null,
-                "description": null,
-                "externalId": null,
-                "firstRunning": null,
-                "healthState": null,
-                "hostname": null,
-                "kind": null,
-                "memoryReservation": null,
-                "milliCpuReservation": null,
-                "removed": null,
-                "startCount": null,
-                "uuid": null,
-                "volumeDriver": null,
-                "workingDir": null,
-                "user": null,
-                "domainName": null,
-                "memorySwap": null,
-                "memory": null,
-                "cpuSet": null,
-                "cpuShares": null,
-                "pidMode": null,
-                "blkioWeight": null,
-                "cgroupParent": null,
-                "usernsMode": null,
-                "pidsLimit": null,
-                "diskQuota": null,
-                "cpuCount": null,
-                "cpuPercent": null,
-                "ioMaximumIOps": null,
-                "ioMaximumBandwidth": null,
-                "cpuPeriod": null,
-                "cpuQuota": null,
-                "cpuSetMems": null,
-                "isolation": null,
-                "kernelMemory": null,
-                "memorySwappiness": null,
-                "shmSize": null,
-                "uts": null,
-                "ipcMode": null,
-                "stopSignal": null,
-                "oomScoreAdj": null,
-                "ip": null,
-                "ip6": null,
-                "healthInterval": null,
-                "healthTimeout": null,
-                "healthRetries": null
-              }
-              request.post({
-                url: service.rancher.endpoint + '/projects/1a3504/container',
-                json: data
-              },function (err, httpResponse, pulsarBody) {
-                pulsarId = pulsarBody.id
-                console.log('create pulsar successfully')
+              request.get({url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/containers/' + xfce4Id}, function(err, httpResponse, body1) {
+                var parsedContainer = JSON.parse(body1)
+                var hostId = parsedContainer.hostId
+                var data = {
+                  "instanceTriggeredStop": "stop",
+                  "startOnCreate": true,
+                  "publishAllPorts": false,
+                  "privileged": false,
+                  "stdinOpen": true,
+                  "tty": true,
+                  "readOnly": false,
+                  "runInit": false,
+                  "networkMode": "container",
+                  "type": "container",
+                  "requestedHostId": hostId,
+                  "restartPolicy": {name: "always"},
+                  "secrets": [],
+                  "dataVolumes": ["/"+req.body.user_id+":/root/Desktop/myFile"],
+                  "dataVolumesFrom": [],
+                  "dns": [],
+                  "dnsSearch": [],
+                  "capAdd": [],
+                  "capDrop": [],
+                  "devices": [],
+                  "logConfig": {"driver": "", "config": {}},
+                  "dataVolumesFromLaunchConfigs": [],
+                  "imageUuid": "docker:cloudwarelabs/pulsar",
+                  "ports": [],
+                  "instanceLinks": {},
+                  "labels": {
+                    "container_type":"cloudware"
+                  },
+                  "name": serviceName + '-pulsar',
+                  "networkContainerId": xfce4Id,
+                  "command": ["pulsar"],
+                  "count": null,
+                  "createIndex": null,
+                  "created": null,
+                  "deploymentUnitUuid": null,
+                  "description": null,
+                  "externalId": null,
+                  "firstRunning": null,
+                  "healthState": null,
+                  "hostname": null,
+                  "kind": null,
+                  "memoryReservation": null,
+                  "milliCpuReservation": null,
+                  "removed": null,
+                  "startCount": null,
+                  "uuid": null,
+                  "volumeDriver": null,
+                  "workingDir": null,
+                  "user": null,
+                  "domainName": null,
+                  "memorySwap": null,
+                  "memory": null,
+                  "cpuSet": null,
+                  "cpuShares": null,
+                  "pidMode": null,
+                  "blkioWeight": null,
+                  "cgroupParent": null,
+                  "usernsMode": null,
+                  "pidsLimit": null,
+                  "diskQuota": null,
+                  "cpuCount": null,
+                  "cpuPercent": null,
+                  "ioMaximumIOps": null,
+                  "ioMaximumBandwidth": null,
+                  "cpuPeriod": null,
+                  "cpuQuota": null,
+                  "cpuSetMems": null,
+                  "isolation": null,
+                  "kernelMemory": null,
+                  "memorySwappiness": null,
+                  "shmSize": null,
+                  "uts": null,
+                  "ipcMode": null,
+                  "stopSignal": null,
+                  "oomScoreAdj": null,
+                  "ip": null,
+                  "ip6": null,
+                  "healthInterval": null,
+                  "healthTimeout": null,
+                  "healthRetries": null
+                }
+                request.post({
+                  url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/container',
+                  json: data
+                },function (err, httpResponse, pulsarBody) {
+                  pulsarId = pulsarBody.id
+                  console.log('create pulsar successfully')
+                })
               })
+
+
             }
           })
         },1000)
@@ -402,7 +409,7 @@ router.route('/services').post(function (req, res) {
     }
     startService()
     request.get({
-      url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s1050'
+      url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/'+service.rancher.lbid
     }, function (err, httpResponse, body1) {
       var proxyData = JSON.parse(body1)
       proxyData.lbConfig.portRules.push({
@@ -415,14 +422,14 @@ router.route('/services').post(function (req, res) {
         "targetPort": 5678
       })
       request.put({
-        url: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s1050',
+        url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
         json: proxyData
       }, function (err, httpResponse, body2) {
         // ensure pulsar created
         setTimeout(function () {
           res.send(JSON.stringify({
             errorCode:0,
-            ws: 'ws://api.cloudwarehub.com:8888/'+serviceName,
+            ws: service.rancher.wsprefix+'/'+serviceName,
             service_name:serviceName,
             service_id:body.id,
             pulsar_id: pulsarId
@@ -438,21 +445,21 @@ router.route('/services').post(function (req, res) {
 router.route('/homeworks').post(function (req, res) {
   //delete lb rule
   console.log('recive post to /homeworks')
-  rp({uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'})
+  rp({uri:service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid})
     .then(function (repos) {
       var proxyData = JSON.parse(repos)
       for(var i = 0; i<proxyData.lbConfig.portRules.length; i++){
-        if(proxyData.lbConfig.portRules[i].hostname!=null && proxyData.lbConfig.portRules[i].hostname.indexOf(req.body.serviceName)!=-1){
+        if(proxyData.lbConfig.portRules[i].path!=null && proxyData.lbConfig.portRules[i].path.indexOf(req.body.serviceName)!=-1){
           proxyData.lbConfig.portRules.splice(i,1)
           break
         }
       }
-      rp({method:'PUT',uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',body:proxyData,json:true})
+      rp({method:'PUT',uri:service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/'+ service.rancher.lbid,body:proxyData,json:true})
         .then(function () {
           //delete service and container
-          rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/services/' + req.body.serviceId})
+          rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/'+ service.rancher.env + '/services/' + req.body.serviceId})
             .then(function () {
-              rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/containers/' + req.body.pulsarId})
+              rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/'+ service.rancher.env + '/containers/' + req.body.pulsarId})
                 .then(function () {
                   res.send(200,{errorCode:0})
                 })
@@ -488,7 +495,7 @@ router.route('/terminals').get(function (req,res) {
     ]
   }
   request.post({
-    url:service.rancher.endpoint + '/projects/1a3504/containers/'+req.headers.cloudware_id+'/?action=execute',
+    url:service.rancher.endpoint + '/projects/'+ service.rancher.env +'/containers/'+req.headers.cloudware_id+'/?action=execute',
     json:data
   },function (err,hr,body) {
     if(err){
