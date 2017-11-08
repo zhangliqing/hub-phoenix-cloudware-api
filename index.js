@@ -408,10 +408,10 @@ router.route('/services').post(function (req, res) {
       proxyData.lbConfig.portRules.push({
         "protocol": "http",
         "type": "portRule",
-        "hostname": serviceName + ".ex-lab.org",
+        "path":"/"+serviceName,
         "priority": 12,
         "serviceId": body.id,
-        "sourcePort": 80,
+        "sourcePort": 8888,
         "targetPort": 5678
       })
       request.put({
@@ -422,7 +422,7 @@ router.route('/services').post(function (req, res) {
         setTimeout(function () {
           res.send(JSON.stringify({
             errorCode:0,
-            ws: 'ws://' + serviceName + '.ex-lab.org',
+            ws: 'ws://api.cloudwarehub.com/'+serviceName,
             service_name:serviceName,
             service_id:body.id,
             pulsar_id: pulsarId
