@@ -5,7 +5,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
 var rp = require('request-promise');
-var service = require('./service');
+var service = require('./service.local');
 var shortid = require('shortid');
 var cors = require('cors')
 
