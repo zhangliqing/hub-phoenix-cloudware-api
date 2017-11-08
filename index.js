@@ -401,6 +401,7 @@ router.route('/services').post(function (req, res) {
             service_id: body.id,
             pulsar_id: pulsarId
           }))
+          clearInterval(p)
           return
         }
       })
