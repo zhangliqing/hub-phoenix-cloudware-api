@@ -285,7 +285,7 @@ router.route('/services').post(function (req, res) {
     json: data
   }, function (err, httpResponse, body) {
     if (err) {
-      res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
+      res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error 1.'}))
       return;
     }
     console.log('create service successfully')
@@ -299,7 +299,7 @@ router.route('/services').post(function (req, res) {
           i++
           if(i == 10){
             clearInterval(p)
-            res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
+            res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error 2.'}))
           }
         }
         else {
