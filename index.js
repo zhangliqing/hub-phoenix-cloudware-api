@@ -281,7 +281,7 @@ router.route('/services').post(function (req, res) {
   }
   data.launchConfig.entryPoint = ["startxfce4"]
   request.post({
-    url: service.rancher.endpoint + '/projects/1a5/service',
+    url: service.rancher.endpoint + '/projects/1a3504/service',
     json: data
   }, function (err, httpResponse, body) {
     if (err) {
@@ -290,11 +290,13 @@ router.route('/services').post(function (req, res) {
     }
     console.log('create service successfully')
     var i = 0
+    console.log('body.id'+body.id)
     var p = setInterval(function () {
       request.get({
-        url: service.rancher.endpoint + '/projects/1a5/services/' + body.id
+        url: service.rancher.endpoint + '/projects/1a3504/services/' + body.id
       }, function (err, httpResponse, body) {
         var parsed = JSON.parse(body);
+        console.log(parsed)
         i++
         if (parsed.type == 'error' || parsed.instanceIds.length == 0) {
           if(i == 30){
@@ -304,7 +306,7 @@ router.route('/services').post(function (req, res) {
           }
         } else {
           var xfce4Id = parsed.instanceIds[0]
-
+          console.log(xfce4Id)
           var data = {
             "instanceTriggeredStop": "stop",
             "startOnCreate": true,
@@ -388,7 +390,7 @@ router.route('/services').post(function (req, res) {
             "healthRetries": null
           }
           request.post({
-            url: service.rancher.endpoint + '/projects/1a5/container',
+            url: service.rancher.endpoint + '/projects/1a3504/container',
             json: data
           }, function (err, httpResponse, pulsarBody) {
             pulsarId = pulsarBody.id
@@ -443,7 +445,7 @@ router.route('/services').post(function (req, res) {
 router.route('/homeworks').post(function (req, res) {
   //delete lb rule
   console.log('recive post to /homeworks')
-  rp({uri: service.rancher.endpoint + '/projects/1a5/loadbalancerservices/1s18'})
+  rp({uri: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'})
     .then(function (repos) {
       var proxyData = JSON.parse(repos)
       for (var i = 0; i < proxyData.lbConfig.portRules.length; i++) {
@@ -454,15 +456,15 @@ router.route('/homeworks').post(function (req, res) {
       }
       rp({
         method: 'PUT',
-        uri: service.rancher.endpoint + '/projects/1a5/loadbalancerservices/1s18',
+        uri: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',
         body: proxyData,
         json: true
       })
         .then(function () {
           //delete service and container
-          rp({method: 'DELETE', uri: service.rancher.endpoint + '/projects/1a5/services/' + req.body.serviceId})
+          rp({method: 'DELETE', uri: service.rancher.endpoint + '/projects/1a3504/services/' + req.body.serviceId})
             .then(function () {
-              rp({method: 'DELETE', uri: service.rancher.endpoint + '/projects/1a5/containers/' + req.body.pulsarId})
+              rp({method: 'DELETE', uri: service.rancher.endpoint + '/projects/1a3504/containers/' + req.body.pulsarId})
                 .then(function () {
                   res.send(200, {errorCode: 0})
                 })
@@ -498,7 +500,7 @@ router.route('/terminals').get(function (req, res) {
     ]
   }
   request.post({
-    url: service.rancher.endpoint + '/projects/1a5/containers/' + req.headers.cloudware_id + '/?action=execute',
+    url: service.rancher.endpoint + '/projects/1a3504/containers/' + req.headers.cloudware_id + '/?action=execute',
     json: data
   }, function (err, hr, body) {
     if (err) {
