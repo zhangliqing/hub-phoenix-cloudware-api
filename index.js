@@ -422,7 +422,7 @@ router.route('/services').post(function (req, res) {
         setTimeout(function () {
           res.send(JSON.stringify({
             errorCode:0,
-            ws: 'ws://api.cloudwarehub.com/'+serviceName,
+            ws: 'ws://api.cloudwarehub.com:8888/'+serviceName,
             service_name:serviceName,
             service_id:body.id,
             pulsar_id: pulsarId
