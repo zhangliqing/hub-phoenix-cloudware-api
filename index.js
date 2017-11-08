@@ -394,6 +394,13 @@ router.route('/services').post(function (req, res) {
                 pulsarId = pulsarBody.id
                 console.log('create pulsar successfully')
               })
+              res.send(200,JSON.stringify({
+                errorCode: 0,
+                ws: service.rancher.wsaddr + '/' + serviceName,
+                service_name: serviceName,
+                service_id: body.id,
+                pulsar_id: pulsarId
+              }))
             }
           })
         }, 1000)
@@ -402,13 +409,7 @@ router.route('/services').post(function (req, res) {
     }
     startService()
 
-    res.send(JSON.stringify({
-      errorCode: 0,
-      ws: service.rancher.wsaddr + '/' + serviceName,
-      service_name: serviceName,
-      service_id: body.id,
-      pulsar_id: pulsarId
-    }))
+
 
 
     /*request.get({
