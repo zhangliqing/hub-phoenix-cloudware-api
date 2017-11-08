@@ -297,7 +297,7 @@ router.route('/services').post(function (req, res) {
         var parsed = JSON.parse(body);
         i++
         if (parsed.type == 'error' || parsed.instanceIds.length == 0) {
-          if(i == 10){
+          if(i == 30){
             console.log(i)
             clearInterval(p)
             res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error 2.'}))
