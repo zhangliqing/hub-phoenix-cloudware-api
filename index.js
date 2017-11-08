@@ -423,7 +423,7 @@ router.route('/services').post(function (req, res) {
         "path":"/"+serviceName,
         "priority": 12,
         "serviceId": body.id,
-        "sourcePort": 8888,
+        "sourcePort": 83,
         "targetPort": 5678
       })
       request.put({
