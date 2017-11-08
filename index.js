@@ -295,16 +295,16 @@ router.route('/services').post(function (req, res) {
         url: service.rancher.endpoint + '/projects/1a5/services/' + body.id
       }, function (err, httpResponse, body) {
         var parsed = JSON.parse(body);
+        i++
         if (parsed.type == 'error' || parsed.instanceIds.length == 0) {
-          i++
           if(i == 10){
+            console.log(i)
             clearInterval(p)
             res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error 2.'}))
           }
-        }
-        else {
+        } else {
           var xfce4Id = parsed.instanceIds[0]
-          cb(xfce4Id)
+
           var data = {
             "instanceTriggeredStop": "stop",
             "startOnCreate": true,
@@ -392,23 +392,19 @@ router.route('/services').post(function (req, res) {
             json: data
           }, function (err, httpResponse, pulsarBody) {
             pulsarId = pulsarBody.id
+            res.send(200,JSON.stringify({
+              errorCode: 0,
+              ws: service.rancher.wsaddr + '/' + serviceName,
+              service_name: serviceName,
+              service_id: body.id,
+              pulsar_id: pulsarId
+            }))
+            clearInterval(p)
             console.log('create pulsar successfully')
           })
-          res.send(200,JSON.stringify({
-            errorCode: 0,
-            ws: service.rancher.wsaddr + '/' + serviceName,
-            service_name: serviceName,
-            service_id: body.id,
-            pulsar_id: pulsarId
-          }))
-          clearInterval(p)
-          return
         }
       })
     },1000)
-
-
-
 
     /*request.get({
       url: service.rancher.endpoint + '/projects/1a5/loadbalancerservices/1s18'
