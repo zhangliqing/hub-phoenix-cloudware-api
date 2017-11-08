@@ -298,7 +298,7 @@ router.route('/services').post(function (req, res) {
         var parsed = JSON.parse(body);
         console.log(parsed)
         i++
-        if (parsed.type == 'error' || parsed.instanceIds.length == 0) {
+        if (parsed.type == 'error' || !parsed.instanceIds || parsed.instanceIds.length == 0) {
           if(i == 20){
             console.log(i)
             clearInterval(p)
