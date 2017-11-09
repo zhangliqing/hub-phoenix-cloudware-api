@@ -38,6 +38,10 @@ router.route('/volumes').post(function(req, res) {
 
   var user_id = req.body.userId
   var tmpData = {
+    accountId: "1a51",
+
+
+
     "instanceTriggeredStop": "stop",
     "startOnCreate": true,
     "publishAllPorts": false,
@@ -85,7 +89,7 @@ router.route('/volumes').post(function(req, res) {
     "removed": null,
     "startCount": null,
     "uuid": null,
-    "volumeDriver": null,
+    "volumeDriver": "rancher-nfs",
     "workingDir": null,
     "user": null,
     "domainName": null,
@@ -185,7 +189,7 @@ router.route('/services').post(function(req, res) {
       },
       "restartPolicy": {"name": "always"},
       "secrets": [],
-      "dataVolumes": [req.body.user_id + ":/root/Desktop/myFile", "dataset:/data:ro"],
+      "dataVolumes": [req.body.user_id + ":/root/Desktop/myFile", "userfile:/data:ro"],
       "dataVolumesFrom": [],
       "dns": [],
       "dnsSearch": [],
@@ -245,7 +249,7 @@ router.route('/services').post(function(req, res) {
       "usernsMode": null,
       "uts": null,
       "uuid": null,
-      "volumeDriver": null,
+      "volumeDriver": "rancher-nfs",
       "workingDir": null,
       "networkLaunchConfig": null
     },
