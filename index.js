@@ -308,8 +308,8 @@ router.route('/services').post(function(req, res) {
         setTimeout(function() {
           request.get({
             url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + body.id
-          }, function(err, httpResponse, body) {
-            var parsed = JSON.parse(body)
+          }, function(err, httpResponse, body2) {
+            var parsed = JSON.parse(body2)
             if (parsed.type == 'error' || !parsed.instanceIds || parsed.instanceIds.length == 0) {
               startService()
             }
