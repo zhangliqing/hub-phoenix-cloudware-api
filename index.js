@@ -299,7 +299,7 @@ router.route('/services').post(function(req, res) {
     console.log('create service successfully')
 
     var i = 0
-    var startServiceSuccess = false
+
     var startService = function() {
       if (i > 10) {
         res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
@@ -405,8 +405,42 @@ router.route('/services').post(function(req, res) {
                   json: data
                 }, function(err, httpResponse, pulsarBody) {
                   pulsarId = pulsarBody.id
-                  startServiceSuccess = true
+
                   console.log('create pulsar successfully')
+
+                  request.get({
+                    url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid
+                  }, function(err, httpResponse, body1) {
+                    var proxyData = JSON.parse(body1)
+                    proxyData.lbConfig.portRules.push({
+                      "backendName": null,
+                      "hostname": null,
+                      "selector": null,
+                      "protocol": "http",
+                      "type": "portRule",
+                      "path": "/" + serviceName,
+                      "priority": 12,
+                      "serviceId": body.id,
+                      "sourcePort": 83,
+                      "targetPort": 5678
+                    })
+                    proxyData.launchConfig.ports.push("83:83/tcp")
+                    request.put({
+                      url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
+                      json: proxyData
+                    }, function(err, httpResponse, body2) {
+                      // ensure pulsar created
+                      setTimeout(function() {
+                        res.send(JSON.stringify({
+                          errorCode: 0,
+                          ws: service.rancher.wsprefix + '/' + serviceName,
+                          service_name: serviceName,
+                          service_id: body.id,
+                          pulsar_id: pulsarId
+                        }))
+                      }, 3000)
+                    })
+                  })
                 })
               })
 
@@ -417,42 +451,6 @@ router.route('/services').post(function(req, res) {
       }
     }
     startService()
-    if(!startServiceSuccess){
-      return
-    }
-    request.get({
-      url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid
-    }, function(err, httpResponse, body1) {
-      var proxyData = JSON.parse(body1)
-      proxyData.lbConfig.portRules.push({
-        "backendName": null,
-        "hostname": null,
-        "selector": null,
-        "protocol": "http",
-        "type": "portRule",
-        "path": "/" + serviceName,
-        "priority": 12,
-        "serviceId": body.id,
-        "sourcePort": 83,
-        "targetPort": 5678
-      })
-      proxyData.launchConfig.ports.push("83:83/tcp")
-      request.put({
-        url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
-        json: proxyData
-      }, function(err, httpResponse, body2) {
-        // ensure pulsar created
-        setTimeout(function() {
-          res.send(JSON.stringify({
-            errorCode: 0,
-            ws: service.rancher.wsprefix + '/' + serviceName,
-            service_name: serviceName,
-            service_id: body.id,
-            pulsar_id: pulsarId
-          }))
-        }, 3000)
-      })
-    })
   })
 })
 
