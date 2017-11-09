@@ -299,10 +299,11 @@ router.route('/services').post(function(req, res) {
     console.log('create service successfully')
 
     var i = 0
+    var startServiceSuccess = false
     var startService = function() {
       if (i > 10) {
         res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
-
+        return
       } else {
         setTimeout(function() {
           request.get({
@@ -404,6 +405,7 @@ router.route('/services').post(function(req, res) {
                   json: data
                 }, function(err, httpResponse, pulsarBody) {
                   pulsarId = pulsarBody.id
+                  startServiceSuccess = true
                   console.log('create pulsar successfully')
                 })
               })
@@ -415,6 +417,9 @@ router.route('/services').post(function(req, res) {
       }
     }
     startService()
+    if(!startServiceSuccess){
+      return
+    }
     request.get({
       url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid
     }, function(err, httpResponse, body1) {
