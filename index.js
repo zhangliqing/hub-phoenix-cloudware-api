@@ -26,124 +26,113 @@ app.use(cors())
 app.use('/', router)
 router.use(verifyToken)
 
-console.log(service.rancher.stackid)
-console.log(service.rancher.env)
-////ddsgdh
-
-// shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$-');
-// router.route('/token').get(function (req,res) {//登录时调用，获取token
-//   var token = jwt.sign({ foo: 'bar' }, 'shhhguanshanhh');
-//   res.send(200,token);
-// })
-
 //创建用户对应文件夹
-//req.body user_id
+//req.body userId
 router.route('/volumes').post(function(req, res) {
-
   // var data = {
   //   "type": "volume",
   //   "driver": "rancher-nfs",
   //   "name": req.body.userId,
   //   "driverOpts": {}
   // }
-  //var user_id = req.body.userId
 
-  // var tmpData = {
-  //   "instanceTriggeredStop": "stop",
-  //   "startOnCreate": true,
-  //   "publishAllPorts": false,
-  //   "privileged": false,
-  //   "stdinOpen": true,
-  //   "tty": true,
-  //   "readOnly": false,
-  //   "runInit": false,
-  //   "networkMode": "managed",
-  //   "type": "container",
-  //   "requestedHostId": "1h5",
-  //   "secrets": [],
-  //   "dataVolumes": [
-  //     user_id + ":/data"
-  //   ],
-  //   "dataVolumesFrom": [],
-  //   "dns": [],
-  //   "dnsSearch": [],
-  //   "capAdd": [],
-  //   "capDrop": [],
-  //   "devices": [],
-  //   "logConfig": {
-  //     "driver": "",
-  //     "config": {}
-  //   },
-  //   //"cmd":["echo","1"],
-  //   "dataVolumesFromLaunchConfigs": [],
-  //   "imageUuid": "docker:busybox",
-  //   "ports": [],
-  //   "instanceLinks": {},
-  //   "labels": {"container_type": "cloudware"},
-  //   "name": "test" + user_id,
-  //   "count": null,
-  //   "createIndex": null,
-  //   "created": null,
-  //   "deploymentUnitUuid": null,
-  //   "description": null,
-  //   "externalId": null,
-  //   "firstRunning": null,
-  //   "healthState": null,
-  //   "hostname": null,
-  //   "kind": null,
-  //   "memoryReservation": null,
-  //   "milliCpuReservation": null,
-  //   "removed": null,
-  //   "startCount": null,
-  //   "uuid": null,
-  //   "volumeDriver": null,
-  //   "workingDir": null,
-  //   "user": null,
-  //   "domainName": null,
-  //   "memorySwap": null,
-  //   "memory": null,
-  //   "cpuSet": null,
-  //   "cpuShares": null,
-  //   "pidMode": null,
-  //   "blkioWeight": null,
-  //   "cgroupParent": null,
-  //   "usernsMode": null,
-  //   "pidsLimit": null,
-  //   "diskQuota": null,
-  //   "cpuCount": null,
-  //   "cpuPercent": null,
-  //   "ioMaximumIOps": null,
-  //   "ioMaximumBandwidth": null,
-  //   "cpuPeriod": null,
-  //   "cpuQuota": null,
-  //   "cpuSetMems": null,
-  //   "isolation": null,
-  //   "kernelMemory": null,
-  //   "memorySwappiness": null,
-  //   "shmSize": null,
-  //   "uts": null,
-  //   "ipcMode": null,
-  //   "stopSignal": null,
-  //   "oomScoreAdj": null,
-  //   "ip": null,
-  //   "ip6": null,
-  //   "healthInterval": null,
-  //   "healthTimeout": null,
-  //   "healthRetries": null
-  // }
-  // request.post({
-  //   url: service.rancher.endpoint + '/projects/'+service.rancher.env+'/container',
-  //   json: tmpData
-  // }, function(err, httpResponse, body) {
-  //   if (err) {
-  //     console.log('create volume fialed')
-  //     res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
-  //   } else {
-  //     console.log('create volume success')
-  //     res.send(201, {errorCode: 0})
-  //   }
-  // })
-  res.send(201, {errorCode: 0})
+  var user_id = req.body.userId
+  var tmpData = {
+    "instanceTriggeredStop": "stop",
+    "startOnCreate": true,
+    "publishAllPorts": false,
+    "privileged": false,
+    "stdinOpen": true,
+    "tty": true,
+    "readOnly": false,
+    "runInit": false,
+    "networkMode": "managed",
+    "type": "container",
+    "requestedHostId": "1h5",
+    "secrets": [],
+    "dataVolumes": [
+      user_id + ":/data"
+    ],
+    "dataVolumesFrom": [],
+    "dns": [],
+    "dnsSearch": [],
+    "capAdd": [],
+    "capDrop": [],
+    "devices": [],
+    "logConfig": {
+      "driver": "",
+      "config": {}
+    },
+    //"cmd":["echo","1"],
+    "dataVolumesFromLaunchConfigs": [],
+    "imageUuid": "docker:busybox",
+    "ports": [],
+    "instanceLinks": {},
+    "labels": {"container_type": "cloudware"},
+    "name": "test" + user_id,
+    "count": null,
+    "createIndex": null,
+    "created": null,
+    "deploymentUnitUuid": null,
+    "description": null,
+    "externalId": null,
+    "firstRunning": null,
+    "healthState": null,
+    "hostname": null,
+    "kind": null,
+    "memoryReservation": null,
+    "milliCpuReservation": null,
+    "removed": null,
+    "startCount": null,
+    "uuid": null,
+    "volumeDriver": null,
+    "workingDir": null,
+    "user": null,
+    "domainName": null,
+    "memorySwap": null,
+    "memory": null,
+    "cpuSet": null,
+    "cpuShares": null,
+    "pidMode": null,
+    "blkioWeight": null,
+    "cgroupParent": null,
+    "usernsMode": null,
+    "pidsLimit": null,
+    "diskQuota": null,
+    "cpuCount": null,
+    "cpuPercent": null,
+    "ioMaximumIOps": null,
+    "ioMaximumBandwidth": null,
+    "cpuPeriod": null,
+    "cpuQuota": null,
+    "cpuSetMems": null,
+    "isolation": null,
+    "kernelMemory": null,
+    "memorySwappiness": null,
+    "shmSize": null,
+    "uts": null,
+    "ipcMode": null,
+    "stopSignal": null,
+    "oomScoreAdj": null,
+    "ip": null,
+    "ip6": null,
+    "healthInterval": null,
+    "healthTimeout": null,
+    "healthRetries": null
+  }
+  request.post({
+    url: service.rancher.endpoint + '/projects/'+service.rancher.env+'/container',
+    json: tmpData
+  }, function(err, httpResponse, body) {
+    if (err) {
+      console.log('create volume fialed')
+      res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
+    } else {
+      console.log('create volume success')
+      res.send(201, {errorCode: 0})
+    }
+  })
+
   // rp({
   //   method: 'POST',
   //   uri: service.rancher.endpoint + '/projects/' + service.rancher.env + '/volume',
