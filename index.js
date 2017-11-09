@@ -424,11 +424,15 @@ router.route('/services').post(function(req, res) {
                       "sourcePort": 83,
                       "targetPort": 5678
                     })
-                    proxyData.launchConfig.ports.push("83:83/tcp")
+
+                    if(proxyData.launchConfig.ports.indexOf("83:83/tcp") === -1){
+                      proxyData.launchConfig.ports.push("83:83/tcp")
+                    }
+
                     request.put({
                       url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
                       json: proxyData
-                    }, function(err, httpResponse, body2) {
+                    }, function(err, httpResponse, body3) {
                       // ensure pulsar created
                       setTimeout(function() {
                         res.send(JSON.stringify({
