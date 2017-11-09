@@ -132,7 +132,7 @@ router.route('/volumes').post(function(req, res) {
     "healthRetries": null
   }
   request.post({
-    url: service.rancher.endpoint + '/projects/1a3504/container',
+    url: service.rancher.endpoint + '/projects/'+service.rancher.env+'/container',
     json: tmpData
   }, function(err, httpResponse, body) {
     if (err) {
