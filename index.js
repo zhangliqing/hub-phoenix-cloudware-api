@@ -438,16 +438,16 @@ router.route('/services').post(function (req, res) {
 router.route('/homeworks').post(function (req, res) {
   //delete lb rule
   console.log('recive post to /homeworks')
-  rp({uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'})
+  rp({uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s1050'})
     .then(function (repos) {
       var proxyData = JSON.parse(repos)
       for(var i = 0; i<proxyData.lbConfig.portRules.length; i++){
-        if(proxyData.lbConfig.portRules[i].hostname!=null && proxyData.lbConfig.portRules[i].hostname.indexOf(req.body.serviceName)!=-1){
+        if(proxyData.lbConfig.portRules[i].path!=null && proxyData.lbConfig.portRules[i].path.indexOf(req.body.serviceName)!=-1){
           proxyData.lbConfig.portRules.splice(i,1)
           break
         }
       }
-      rp({method:'PUT',uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',body:proxyData,json:true})
+      rp({method:'PUT',uri:service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s1050',body:proxyData,json:true})
         .then(function () {
           //delete service and container
           rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/services/' + req.body.serviceId})
@@ -457,19 +457,23 @@ router.route('/homeworks').post(function (req, res) {
                   res.send(200,{errorCode:0})
                 })
                 .catch(function () {
+                  console.log('delete pulsar container error.')
                   res.send(500, {errorCode:1,errorMessage:'delete pulsar container error.'})
                 })
             })
             .catch(function () {
+              console.log('delete service error.')
               res.send(500, {errorCode:1,errorMessage:'delete service error.'})
             })
         })
         .catch(function () {
+          console.log('delete loadBalance rule error.')
           res.send(500, {errorCode:1,errorMessage:'delete loadBalance rule error.'})
 
         })
     })
     .catch(function (err) {
+      console.log('get loadBalancer rules error')
       res.send(500, {errorCode:1,errorMessage:'get loadBalancer rules error'})
     })
 })
