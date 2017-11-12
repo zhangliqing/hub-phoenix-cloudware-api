@@ -133,7 +133,7 @@ router.route('/volumes').post(function (req,res) {
     })
   }
 
-  rp({method:'POST',uri:'http://117.50.1.134:8080/v2-beta/projects/1a3504/volume',body:data,json:true})
+  rp({method:'POST',uri:service.rancher.endpoint + '/projects/1a3504/volume',body:data,json:true})
     .then(function () {
       openContainer(req.body.userId)
       console.log('create volume success')
