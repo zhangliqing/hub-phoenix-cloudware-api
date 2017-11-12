@@ -454,6 +454,7 @@ router.route('/homeworks').post(function (req, res) {
             .then(function () {
               rp({method:'DELETE',uri:service.rancher.endpoint + '/projects/1a3504/containers/' + req.body.pulsarId})
                 .then(function () {
+                  console.log('delete pulsar: ' + req.body.pulsarId)
                   res.send(200,{errorCode:0})
                 })
                 .catch(function () {
