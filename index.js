@@ -243,7 +243,7 @@ router.route('/services').post(function (req, res) {
       "usernsMode": null,
       "uts": null,
       "uuid": null,
-      "volumeDriver": null,
+      "volumeDriver": "rancher-nfs",
       "workingDir": null,
       "networkLaunchConfig": null
     },
