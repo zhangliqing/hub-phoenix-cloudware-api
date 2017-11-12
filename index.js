@@ -154,7 +154,7 @@ router.route('/services').post(function (req, res) {
   serviceName = serviceName.replace('_', 'aa')
   serviceName = serviceName.replace('-', 'bb')
   var pulsarId=''
-
+  console.log('userid: '+req.body.user_id)
   //create service
   var data = {
     "scale": 1,
