@@ -198,7 +198,7 @@ router.route('/services').post(function(req, res) {
       "devices": [],
       "logConfig": {"driver": "", "config": {}},
       "dataVolumesFromLaunchConfigs": [],
-      "imageUuid": "docker:cloudwarelabs/base:v2.0",
+      "imageUuid": "docker:cloudwarelabs/base:v3.0",
       "ports": [],
       "blkioWeight": null,
       "cgroupParent": null,
@@ -273,7 +273,7 @@ router.route('/services').post(function(req, res) {
       data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v2.0"
       break
     case 'base':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v3.0"
       break
     case 'rstudio':
       data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v2.0"
@@ -282,7 +282,7 @@ router.route('/services').post(function(req, res) {
       data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v2.0"
       break
     default:
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v3.0"
       break
   }
   data.launchConfig.entryPoint = ["startxfce4"]
