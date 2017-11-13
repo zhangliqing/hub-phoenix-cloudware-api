@@ -276,7 +276,7 @@ router.route('/services').post(function(req, res) {
       data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v3.0"
       break
     case 'rstudio':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v3.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v2.0"
       break
     case 'hadoop':
       data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v3.0"
