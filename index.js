@@ -189,7 +189,7 @@ router.route('/services').post(function(req, res) {
       },
       "restartPolicy": {"name": "always"},
       "secrets": [],
-      "dataVolumes": [req.body.user_id + ":/root/Desktop/myFile", "userfile:/data:ro"],
+      "dataVolumes": [req.body.user_id + ":/root/Desktop/myFile", "userfile:/data:ro", "code:/code:ro"],
       "dataVolumesFrom": [],
       "dns": [],
       "dnsSearch": [],
