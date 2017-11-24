@@ -170,8 +170,6 @@ router.route('/services').post(function(req, res) {
     "type": "service",
     "stackId": service.rancher.stackid,
     "launchConfig": {
-      //"environment": {"DISPLAY": ":0"},
-      //"command": "startxfce4",
       "instanceTriggeredStop": "stop",
       "kind": "container",
       "networkMode": "managed",
