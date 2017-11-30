@@ -3,13 +3,13 @@
  */
 module.exports = {
   rancher: {
-    endpoint: 'http://10.2.253.121:8080/v2-beta',//去单引号
+    endpoint: 'http://bigdata.tongji.edu.cn/:8080/v2-beta',//去单引号
     user: process.env.RANCHER_USER,
     pass: process.env.RANCHER_PASS,
-    env: '1a51',
-    lbid: '1s16',
-    wsprefix: 'ws://10.2.253.122:83',
-    stackid: '1st16'
+    env: '1a1235',
+    lbid: '1s41',
+    wsprefix: 'ws://bigdata.tongji.edu.cn:8080',
+    stackid: '1st14'
   },
   etcd: {
     server: process.env.ETCD_SERVER
@@ -18,5 +18,4 @@ module.exports = {
   proxy: {
     server: process.env.PROXY_SERVER
   },
-
 }
