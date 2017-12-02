@@ -268,19 +268,19 @@ router.route('/services').post(function(req, res) {
   }
   switch (req.body.cloudware_type) {
     case 'python':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v3.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v1.0"
       break
     case 'base':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v3.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v1.0"
       break
     case 'rstudio':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v2.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v1.0"
       break
     case 'hadoop':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v3.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v1.0"
       break
     default:
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v3.0"
+      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v1.0"
       break
   }
   data.launchConfig.entryPoint = ["startxfce4"]
