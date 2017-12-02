@@ -13,6 +13,7 @@ var app = express()
 var router = express.Router()
 var port = process.env.PORT || 8080
 var verifyToken = function(req, res, next) {
+
   if (req.body.secret != 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MDU4MTM0NTd9.Ftw1yHeUrqdNvymFZcIpuEoS0RHBFZqu4MfUZON9Zm0') {
     res.send(401, JSON.stringify({errorCode: 1, errorMessage: 'Authentication failed.'}))
     return
@@ -187,7 +188,7 @@ router.route('/services').post(function(req, res) {
       },
       "restartPolicy": {"name": "always"},
       "secrets": [],
-      "dataVolumes": [req.body.user_id + ":/root/Desktop/myFile", "userfile:/data:ro", "code:/code:ro"],
+      //"dataVolumes": [req.body.user_id + ":/root/Desktop/myFile", "userfile:/data:ro", "code:/code:ro"],
       "dataVolumesFrom": [],
       "dns": [],
       "dnsSearch": [],
@@ -196,7 +197,7 @@ router.route('/services').post(function(req, res) {
       "devices": [],
       "logConfig": {"driver": "", "config": {}},
       "dataVolumesFromLaunchConfigs": [],
-      "imageUuid": "docker:cloudwarelabs/base:v3.0",
+      "imageUuid": "docker:cloudwarelabs/base:v1.0",
       "ports": [],
       "blkioWeight": null,
       "cgroupParent": null,
@@ -289,6 +290,8 @@ router.route('/services').post(function(req, res) {
     json: data
   }, function(err, httpResponse, body) {
     if (err) {
+      console.log(err)
+      console.log(service.rancher.endpoint + '/projects/' + service.rancher.env + '/service')
       res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
       return
     }
@@ -328,7 +331,7 @@ router.route('/services').post(function(req, res) {
                   "requestedHostId": hostId,
                   "restartPolicy": {name: "always"},
                   "secrets": [],
-                  "dataVolumes": ["/" + req.body.user_id + ":/root/Desktop/myFile"],
+                  //"dataVolumes": ["/" + req.body.user_id + ":/root/Desktop/myFile"],
                   "dataVolumesFrom": [],
                   "dns": [],
                   "dnsSearch": [],
