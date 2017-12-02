@@ -3,7 +3,7 @@
  */
 module.exports = {
   rancher: {
-    endpoint: '192.168.1.132:8080/v2-beta',//去单引号
+    endpoint: 'http://192.168.1.132:8080/v2-beta',//去单引号
     user: process.env.RANCHER_USER,
     pass: process.env.RANCHER_PASS,
     env: '1a1235',
