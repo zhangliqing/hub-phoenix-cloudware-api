@@ -19,4 +19,3 @@ module.exports = {
     server: process.env.PROXY_SERVER
   },
 }
-transwarp
