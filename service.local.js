@@ -8,7 +8,7 @@ module.exports = {
     pass: process.env.RANCHER_PASS,
     env: '1a1235',
     lbid: '1s41',
-    wsprefix: 'ws://192.168.1.133:83',
+    wsprefix: 'ws://bigdata.tongji.edu.cn:83',
     stackid: '1st18'
   },
   etcd: {
