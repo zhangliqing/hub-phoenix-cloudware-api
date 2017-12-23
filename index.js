@@ -7,7 +7,9 @@ var request = require('request');
 var rp = require('request-promise');
 var service = require('./service.local');
 var shortid = require('shortid');
-var cors = require('cors')
+var cors = require('cors');
+var cloudware = require('./cloudware');
+var jupyter = require('./jupyter');
 
 var app = express();
 var router = express.Router();
@@ -25,13 +27,6 @@ app.use(bodyParser.json());
 app.use(cors())
 app.use('/', router);
 router.use(verifyToken);
-////ddsgdh
-
-// shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$-');
-// router.route('/token').get(function (req,res) {//登录时调用，获取token
-//   var token = jwt.sign({ foo: 'bar' }, 'shhhguanshanhh');
-//   res.send(200,token);
-// })
 
 //创建用户对应文件夹
 //req.body user_id
@@ -149,7 +144,6 @@ router.route('/volumes').post(function (req, res) {
 //req.body: cloudware_type user_id
 //res: ws service_name service_id pulsar_id
 router.route('/services').post(function (req, res) {
-  var sended = 0
   console.log('recive post to /service')
   var serviceName = shortid.generate()
   serviceName = serviceName.replace('_', 'aa')
@@ -164,8 +158,6 @@ router.route('/services').post(function (req, res) {
     "type": "service",
     "stackId": "1st15",
     "launchConfig": {
-      //"environment": {"DISPLAY": ":0"},
-      //"command": "startxfce4",
       "instanceTriggeredStop": "stop",
       "kind": "container",
       "networkMode": "managed",
@@ -263,203 +255,13 @@ router.route('/services').post(function (req, res) {
     "vip": null,
     "fqdn": null
   };
-  switch (req.body.cloudware_type) {
-    case 'python':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v2.0"
-      break;
-    case 'base':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
-      break;
-    case 'rstudio':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/rstudio:v3.0"
-      break;
-    case 'hadoop':
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/hadoop:v3.0"
-      break;
-    default:
-      data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
-      break;
+
+  if(req.body.cloudware.indexOf('jupyter') !== -1){
+    var userId = req.body.user_id
+    jupyter.create(data,req.body.cloudware,request,userId,res,service,serviceName)
+  }else {
+    cloudware.create(data,req.body.cloudware,request,req,res,service,serviceName )
   }
-  data.launchConfig.entryPoint = ["startxfce4"]
-  request.post({
-    url: service.rancher.endpoint + '/projects/1a3504/service',
-    json: data
-  }, function (err, httpResponse, body) {
-    if (err) {
-      res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error 1.'}))
-      return;
-    }
-    console.log('create service successfully')
-    var i = 0
-    console.log('body.id'+body.id)
-    var p = setInterval(function () {
-      request.get({
-        url: service.rancher.endpoint + '/projects/1a3504/services/' + body.id
-      }, function (err, httpResponse, body) {
-        var parsed = JSON.parse(body);
-        console.log(parsed)
-        i++
-        if (parsed.type == 'error' || !parsed.instanceIds || parsed.instanceIds.length == 0) {
-          if(i == 20){
-            console.log(i)
-            clearInterval(p)
-            res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error 2.'}))
-          }
-        } else {
-          clearInterval(p)
-          var xfce4Id = parsed.instanceIds[0]
-
-          var time = 0
-          var Int = setInterval(function () {
-            time++
-            request.get({url: 'http://117.50.1.134:8080/v2-beta/projects/1a3504' + '/containers/' + xfce4Id}, function (err, httpResponse, body1) {
-              var parsedContainer = JSON.parse(body1)
-              if(parsedContainer.type == 'error' || !parsedContainer.primaryIpAddress){//没有ip
-                if(time == 20){
-                  clearInterval(Int)
-                  res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error 3.'}))
-                }
-              }else {
-                console.log('parsedContainer.primaryIpAddress: '+parsedContainer.primaryIpAddress)
-                var data = {
-                  "instanceTriggeredStop": "stop",
-                  "startOnCreate": true,
-                  "publishAllPorts": false,
-                  "privileged": false,
-                  "stdinOpen": true,
-                  "tty": true,
-                  "readOnly": false,
-                  "runInit": false,
-                  "networkMode": "container",
-                  "type": "container",
-                  "requestedHostId": "1h5",
-                  "restartPolicy": {name: "always"},
-                  "secrets": [],
-                  "dataVolumes": ["/" + req.body.user_id + ":/root/Desktop/myFile"],
-                  "dataVolumesFrom": [],
-                  "dns": [],
-                  "dnsSearch": [],
-                  "capAdd": [],
-                  "capDrop": [],
-                  "devices": [],
-                  "logConfig": {"driver": "", "config": {}},
-                  "dataVolumesFromLaunchConfigs": [],
-                  "imageUuid": "docker:cloudwarelabs/pulsar",
-                  "ports": [],
-                  "instanceLinks": {},
-                  "labels": {
-                    "container_type": "cloudware"
-                  },
-                  "name": serviceName + '-pulsar',
-                  "networkContainerId": xfce4Id,
-                  "command": ["pulsar"],
-                  "count": null,
-                  "createIndex": null,
-                  "created": null,
-                  "deploymentUnitUuid": null,
-                  "description": null,
-                  "externalId": null,
-                  "firstRunning": null,
-                  "healthState": null,
-                  "hostname": null,
-                  "kind": null,
-                  "memoryReservation": null,
-                  "milliCpuReservation": null,
-                  "removed": null,
-                  "startCount": null,
-                  "uuid": null,
-                  "volumeDriver": null,
-                  "workingDir": null,
-                  "user": null,
-                  "domainName": null,
-                  "memorySwap": null,
-                  "memory": null,
-                  "cpuSet": null,
-                  "cpuShares": null,
-                  "pidMode": null,
-                  "blkioWeight": null,
-                  "cgroupParent": null,
-                  "usernsMode": null,
-                  "pidsLimit": null,
-                  "diskQuota": null,
-                  "cpuCount": null,
-                  "cpuPercent": null,
-                  "ioMaximumIOps": null,
-                  "ioMaximumBandwidth": null,
-                  "cpuPeriod": null,
-                  "cpuQuota": null,
-                  "cpuSetMems": null,
-                  "isolation": null,
-                  "kernelMemory": null,
-                  "memorySwappiness": null,
-                  "shmSize": null,
-                  "uts": null,
-                  "ipcMode": null,
-                  "stopSignal": null,
-                  "oomScoreAdj": null,
-                  "ip": null,
-                  "ip6": null,
-                  "healthInterval": null,
-                  "healthTimeout": null,
-                  "healthRetries": null
-                }
-                request.post({
-                  url: service.rancher.endpoint + '/projects/1a3504/container',
-                  json: data
-                }, function (err, httpResponse, pulsarBody) {
-                  pulsarId = pulsarBody.id
-                  if (sended == 0) {
-                    res.send(200,JSON.stringify({
-                      errorCode: 0,
-                      ws: service.rancher.wsaddr + '/' + serviceName,
-                      service_name: serviceName,
-                      service_id: body.id,
-                      pulsar_id: pulsarId
-                    }))
-                    sended = 1
-                  }
-
-                  clearInterval(Int)
-                  console.log('create pulsar successfully')
-                })
-              }
-            })
-
-          },1000)
-        }
-      })
-    },1000)
-
-    /*request.get({
-      url: service.rancher.endpoint + '/projects/1a5/loadbalancerservices/1s18'
-    }, function (err, httpResponse, body1) {
-      var proxyData = JSON.parse(body1)
-      proxyData.lbConfig.portRules.push({
-        "protocol": "http",
-        "type": "portRule",
-        "hostname": serviceName + ".ex-lab.local",
-        "priority": 12,
-        "serviceId": body.id,
-        "sourcePort": 80,
-        "targetPort": 5678
-      })
-      request.put({
-        url: service.rancher.endpoint + '/projects/1a5/loadbalancerservices/1s18',
-        json: proxyData
-      }, function (err, httpResponse, body2) {
-        // ensure pulsar created
-        setTimeout(function () {
-          res.send(JSON.stringify({
-            errorCode: 0,
-            ws: 'ws://' + serviceName + '.ex-lab.local',
-            service_name: serviceName,
-            service_id: body.id,
-            pulsar_id: pulsarId
-          }))
-        }, 3000)
-      })
-    })*/
-  });
 })
 
 //删除云件
