@@ -256,8 +256,8 @@ router.route('/services').post(function (req, res) {
     "fqdn": null
   };
 
-  if(req.body.cloudware.indexOf('jupyter') !== -1){
-    var userId = req.body.userId
+  if(req.body.cloudware_type.indexOf('jupyter') !== -1){
+    var userId = req.body.user_id
     jupyter.create(data,req.body.cloudware,request,userId,res,service,serviceName)
   }else {
     cloudware.create(data,req.body.cloudware,request,req,res,service,serviceName )
@@ -265,7 +265,7 @@ router.route('/services').post(function (req, res) {
 })
 
 //删除云件
-//req.body: serviceName serviceId pulsarId
+//req.body: service_name service_id pulsar_id
 router.route('/homeworks').post(function (req, res) {
   console.log('recive post to /homeworks')
 

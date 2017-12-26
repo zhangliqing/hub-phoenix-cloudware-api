@@ -191,7 +191,7 @@ module.exports = {
       console.log('jinru lb')
       var proxyData = JSON.parse(body)
       for (var i = 0; i < proxyData.lbConfig.portRules.length; i++) {
-        if (proxyData.lbConfig.portRules[i].path != null && proxyData.lbConfig.portRules[i].path.indexOf(req.body.serviceName) != -1) {
+        if (proxyData.lbConfig.portRules[i].path != null && proxyData.lbConfig.portRules[i].path.indexOf(req.body.service_name) != -1) {
           proxyData.lbConfig.portRules.splice(i, 1) //删除该规则
           break
         }
@@ -201,11 +201,11 @@ module.exports = {
         body: proxyData,
         json: true},function() {
         //delete service and pulsar
-        request.delete({url: serviceUrl + req.body.serviceId},function (err, httpResponse, body) {
+        request.delete({url: serviceUrl + req.body.service_id},function (err, httpResponse, body) {
           if(err){
             res.send(500,{errorCode: 1, errorMessage: 'delete service error.'})
           }else {
-            request.delete({url: containerUrl + req.body.pulsarId},function(err, httpResponse, body) {
+            request.delete({url: containerUrl + req.body.pulsar_id},function(err, httpResponse, body) {
               if(err){
                 res.send(500,{errorCode: 1, errorMessage: 'delete pulsar error.'})
               }else {
