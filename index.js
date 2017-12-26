@@ -141,7 +141,7 @@ router.route('/volumes').post(function (req, res) {
 })
 
 //启动云件
-//req.body: cloudware_type user_id
+//req.body: cloudware userId
 //res: ws service_name service_id pulsar_id
 router.route('/services').post(function (req, res) {
   console.log('recive post to /service')
@@ -176,7 +176,7 @@ router.route('/services').post(function (req, res) {
       },
       "restartPolicy": {"name": "always"},
       "secrets": [],
-      "dataVolumes": [req.body.user_id + ":/root/Desktop/myFile"],
+      "dataVolumes": [req.body.userId + ":/root/Desktop/myFile"],
       "dataVolumesFrom": [],
       "dns": [],
       "dnsSearch": [],
@@ -257,7 +257,7 @@ router.route('/services').post(function (req, res) {
   };
 
   if(req.body.cloudware.indexOf('jupyter') !== -1){
-    var userId = req.body.user_id
+    var userId = req.body.userId
     jupyter.create(data,req.body.cloudware,request,userId,res,service,serviceName)
   }else {
     cloudware.create(data,req.body.cloudware,request,req,res,service,serviceName )
@@ -267,47 +267,17 @@ router.route('/services').post(function (req, res) {
 //删除云件
 //req.body: serviceName serviceId pulsarId
 router.route('/homeworks').post(function (req, res) {
-  //delete lb rule
   console.log('recive post to /homeworks')
-  rp({uri: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18'})
-    .then(function (repos) {
-      var proxyData = JSON.parse(repos)
-      for (var i = 0; i < proxyData.lbConfig.portRules.length; i++) {
-        if (proxyData.lbConfig.portRules[i].hostname != null && proxyData.lbConfig.portRules[i].hostname.indexOf(req.body.serviceName) != -1) {
-          proxyData.lbConfig.portRules.splice(i, 1)
-          break
-        }
-      }
-      rp({
-        method: 'PUT',
-        uri: service.rancher.endpoint + '/projects/1a3504/loadbalancerservices/1s18',
-        body: proxyData,
-        json: true
-      })
-        .then(function () {
-          //delete service and container
-          rp({method: 'DELETE', uri: service.rancher.endpoint + '/projects/1a3504/services/' + req.body.serviceId})
-            .then(function () {
-              rp({method: 'DELETE', uri: service.rancher.endpoint + '/projects/1a3504/containers/' + req.body.pulsarId})
-                .then(function () {
-                  res.send(200, {errorCode: 0})
-                })
-                .catch(function () {
-                  res.send(500, {errorCode: 1, errorMessage: 'delete pulsar container error.'})
-                })
-            })
-            .catch(function () {
-              res.send(500, {errorCode: 1, errorMessage: 'delete service error.'})
-            })
-        })
-        .catch(function () {
-          res.send(500, {errorCode: 1, errorMessage: 'delete loadBalance rule error.'})
 
-        })
-    })
-    .catch(function (err) {
-      res.send(500, {errorCode: 1, errorMessage: 'get loadBalancer rules error'})
-    })
+  lbUrl = service.rancher.endpoint + '/projects/'+service.rancher.env+'/loadbalancerservices/'+service.rancher.lbid;
+  serviceUrl = service.rancher.endpoint + '/projects/'+service.rancher.env+'/services/'
+  containerUrl = service.rancher.endpoint + '/projects/'+service.rancher.env+'/containers/'
+
+  if(req.body.pulsarId){
+    cloudware.delete(req,res,request,lbUrl,serviceUrl,containerUrl)
+  }else {
+    jupyter.delete(req,res,request,lbUrl,serviceUrl)
+  }
 })
 
 //开启云件对应terminal
