@@ -258,16 +258,18 @@ router.route('/services').post(function (req, res) {
 
   if(req.body.cloudware_type.indexOf('jupyter') !== -1){
     var userId = req.body.user_id
-    jupyter.create(data,req.body.cloudware,request,userId,res,service,serviceName)
+    jupyter.create(data,req.body.cloudware_type,request,userId,res,service,serviceName)
   }else {
-    cloudware.create(data,req.body.cloudware,request,req,res,service,serviceName )
+    cloudware.create(data,req.body.cloudware_type,request,req,res,service,serviceName )
   }
 })
 
 //删除云件
 //req.body: service_name service_id pulsar_id
 router.route('/homeworks').post(function (req, res) {
+
   console.log('recive post to /homeworks')
+  console.log(req)
 
   lbUrl = service.rancher.endpoint + '/projects/'+service.rancher.env+'/loadbalancerservices/'+service.rancher.lbid;
   serviceUrl = service.rancher.endpoint + '/projects/'+service.rancher.env+'/services/'
