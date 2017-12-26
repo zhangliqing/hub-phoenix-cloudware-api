@@ -165,7 +165,7 @@ module.exports = {
                           setTimeout(function() {
                             res.send(JSON.stringify({
                               errorCode: 0,
-                              ws: service.rancher.wsprefix + '/' + serviceName,
+                              ws: service.rancher.wsaddr + '/' + serviceName,
                               service_name: serviceName,
                               service_id: serviceBody.id,
                               pulsar_id: pulsarId
