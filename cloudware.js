@@ -188,7 +188,6 @@ module.exports = {
 
     //remove lb rule
     request.get({url:lbUrl},function(err, httpResponse, body) {
-      console.log('jinru lb')
       var proxyData = JSON.parse(body)
       for (var i = 0; i < proxyData.lbConfig.portRules.length; i++) {
         if (proxyData.lbConfig.portRules[i].path != null && proxyData.lbConfig.portRules[i].path.indexOf(req.body.serviceName) != -1) {
