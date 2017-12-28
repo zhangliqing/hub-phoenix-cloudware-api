@@ -1,6 +1,6 @@
 module.exports = {
-  create: function(data,cloudwareType,request,req,res,service,serviceName) {
-    switch (cloudwareType) {
+  create: function(data,req,res,request,service,serviceName) {
+    switch (req.body.cloudware_type) {
       case 'python':
         data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v2.0"
         break;
@@ -136,7 +136,7 @@ module.exports = {
                       url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/container',
                       json: data
                     }, function(err, httpResponse, pulsarBody) {
-                      pulsarId = pulsarBody.id
+                      var pulsarId = pulsarBody.id
                       console.log('create pulsar successfully')
 
                       request.get({

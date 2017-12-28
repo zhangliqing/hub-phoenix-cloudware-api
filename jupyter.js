@@ -1,6 +1,6 @@
 module.exports = {
-  create: function(data,jupyterType,request,userId,res,service,serviceName) {
-    switch (jupyterType) {
+  create: function(data,req,res,request,service,serviceName) {
+    switch (req.body.cloudware_type) {
       case 'jupyterPython':
         data.launchConfig.imageUuid = "docker:jupyter/base-notebook"
         break
@@ -8,7 +8,7 @@ module.exports = {
         data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
         break
     }
-    data.launchConfig.dataVolumes = [userId + ":/home/jovyan"]
+    data.launchConfig.dataVolumes = [req.body.user_id + ":/home/jovyan"]
     data.launchConfig.command=["start-notebook.sh", "--NotebookApp.token=''"]
 
     request.post({
@@ -68,6 +68,7 @@ module.exports = {
                       ws: serviceName+".cloudwarehub.com:83",
                       service_name: serviceName,
                       service_id: serviceBodyWithoutInstance.id,
+                      pulsar_id: ''
                     }))
                   })
                 })
