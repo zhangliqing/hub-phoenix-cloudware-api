@@ -255,11 +255,16 @@ router.route('/services').post(function (req, res) {
     "fqdn": null
   };
 
-  if(req.body.cloudware_type.indexOf('jupyter') !== -1){
-    jupyter.create(data,req,res,request,service,serviceName)
+  if(req.body.cloudware_type !== undefined){
+    if(req.body.cloudware_type.indexOf('jupyter') !== -1){
+      jupyter.create(data,req,res,request,service,serviceName)
+    }else {
+      cloudware.create(data,req,res,request,service,serviceName)
+    }
   }else {
-    cloudware.create(data,req,res,request,service,serviceName)
+    res.send(500,{errorCode: 1, errorMessage: 'no cloudware type'})
   }
+
 })
 
 //删除云件
