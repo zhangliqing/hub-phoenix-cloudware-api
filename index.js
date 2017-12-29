@@ -155,7 +155,7 @@ router.route('/services').post(function (req, res) {
     "assignServiceIpAddress": false,
     "startOnCreate": true,
     "type": "service",
-    "stackId": "1st15",
+    "stackId": "1st31",
     "launchConfig": {
       "instanceTriggeredStop": "stop",
       "kind": "container",
