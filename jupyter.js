@@ -1,7 +1,7 @@
 module.exports = {
   create: function(data,req,res,request,service,serviceName) {
     switch (req.body.cloudware_type) {
-      case 'jupyterPython':
+      case 'jupyter_python':
         data.launchConfig.imageUuid = "docker:jupyter/base-notebook"
         break
       default:
