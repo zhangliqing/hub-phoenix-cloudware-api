@@ -264,7 +264,6 @@ router.route('/services').post(function (req, res) {
   }else {
     res.send(500,{errorCode: 1, errorMessage: 'no cloudware type'})
   }
-
 })
 
 //删除云件

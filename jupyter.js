@@ -63,13 +63,16 @@ module.exports = {
                     url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
                     json: proxyData
                   }, function(err, httpResponse, body3) {
-                    res.send(JSON.stringify({
-                      errorCode: 0,
-                      ws: serviceName+".cloudwarehub.com:83",
-                      service_name: serviceName,
-                      service_id: serviceBodyWithoutInstance.id,
-                      pulsar_id: ''
-                    }))
+                    setTimeout(function() {
+                      res.send(JSON.stringify({
+                        errorCode: 0,
+                        ws: serviceName+".cloudwarehub.com:83",
+                        service_name: serviceName,
+                        service_id: serviceBodyWithoutInstance.id,
+                        pulsar_id: ''
+                      }))
+                    },3000)
+
                   })
                 })
               }
