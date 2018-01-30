@@ -10,10 +10,13 @@ var shortid = require('shortid');
 var cors = require('cors');
 var cloudware = require('./cloudware');
 var jupyter = require('./jupyter');
+var ide = require('./ide')
 
 var app = express();
 var router = express.Router();
 var port = process.env.PORT || 8080;
+
+
 var verifyToken = function (req, res, next) {
   if (req.body.secret != 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MDU4MTM0NTd9.Ftw1yHeUrqdNvymFZcIpuEoS0RHBFZqu4MfUZON9Zm0') {
     res.send(401, JSON.stringify({errorCode: 1, errorMessage: 'Authentication failed.'}))
@@ -29,7 +32,7 @@ app.use('/', router);
 router.use(verifyToken);
 
 //创建用户对应文件夹
-//req.body user_id
+//req.body userId
 router.route('/volumes').post(function (req, res) {
   console.log('recive post to /volumes')
   var data = {
@@ -38,7 +41,7 @@ router.route('/volumes').post(function (req, res) {
     "name": req.body.userId,
     "driverOpts": {}
   }
-  var openContainer = function (user_id) {
+  var openContainer = function (userId) {
     var tmpData = {
       "instanceTriggeredStop": "stop",
       "startOnCreate": true,
@@ -53,7 +56,7 @@ router.route('/volumes').post(function (req, res) {
       "requestedHostId": "1h5",
       "secrets": [],
       "dataVolumes": [
-        user_id + ":/data"
+        userId + ":/data"
       ],
       "dataVolumesFrom": [],
       "dns": [],
@@ -71,7 +74,7 @@ router.route('/volumes').post(function (req, res) {
       "ports": [],
       "instanceLinks": {},
       "labels": {"container_type": "cloudware"},
-      "name": "test" + user_id,
+      "name": "test" + userId,
       "count": null,
       "createIndex": null,
       "created": null,
@@ -141,8 +144,8 @@ router.route('/volumes').post(function (req, res) {
 })
 
 //启动云件
-//req.body: cloudware_type user_id
-//res: ws service_name service_id pulsar_id
+//req.body: cloudwareType userId
+//res: ws serviceName serviceId pulsarId
 router.route('/services').post(function (req, res) {
   console.log('recive post to /service')
   var serviceName = shortid.generate()
@@ -175,7 +178,7 @@ router.route('/services').post(function (req, res) {
       },
       "restartPolicy": {"name": "always"},
       "secrets": [],
-      "dataVolumes": [req.body.user_id + ":/root/Desktop/myFile"],
+      "dataVolumes": [req.body.userId + ":/root/Desktop/myFile"],
       "dataVolumesFrom": [],
       "dns": [],
       "dnsSearch": [],
@@ -255,9 +258,11 @@ router.route('/services').post(function (req, res) {
     "fqdn": null
   };
 
-  if(req.body.cloudware_type !== undefined){
-    if(req.body.cloudware_type.indexOf('jupyter') !== -1){
+  if(req.body.cloudwareType !== undefined){
+    if(req.body.cloudwareType.indexOf('jupyter') !== -1){
       jupyter.create(data,req,res,request,service,serviceName)
+    }else if(req.body.cloudwareType.indexOf('ide') !== -1){
+      ide.create(data,req,res,request,service,serviceName)
     }else {
       cloudware.create(data,req,res,request,service,serviceName)
     }
@@ -267,7 +272,7 @@ router.route('/services').post(function (req, res) {
 })
 
 //删除云件
-//req.body: service_name service_id pulsar_id
+//req.body: serviceName serviceId  pulsarId(可选)
 router.route('/homeworks').post(function (req, res) {
   console.log('recive post to /homeworks')
 
@@ -277,13 +282,13 @@ router.route('/homeworks').post(function (req, res) {
 
   if(req.body.pulsarId){
     cloudware.delete(req,res,request,lbUrl,serviceUrl,containerUrl)
-  }else {
+  }else { //jupyter与ide相同
     jupyter.delete(req,res,request,lbUrl,serviceUrl)
   }
 })
 
 //开启云件对应terminal
-//req.header service_id
+//req.header serviceId
 router.route('/terminals').get(function (req, res) {
   var data = {
     attachStdin: true,
@@ -296,7 +301,7 @@ router.route('/terminals').get(function (req, res) {
     ]
   }
   request.post({
-    url: service.rancher.endpoint + '/projects/1a3504/containers/' + req.headers.cloudware_id + '/?action=execute',
+    url: service.rancher.endpoint + '/projects/1a3504/containers/' + req.headers.cloudwareId + '/?action=execute',
     json: data
   }, function (err, hr, body) {
     if (err) {

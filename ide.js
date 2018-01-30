@@ -1,15 +1,17 @@
+/**
+ * Created by zhangliqing on 2018/1/16.
+ */
 module.exports = {
   create: function(data,req,res,request,service,serviceName) {
     switch (req.body.cloudwareType) {
-      case 'jupyter_python':
-        data.launchConfig.imageUuid = "docker:jupyter/base-notebook"
+      case 'ide_java':
+        data.launchConfig.imageUuid = "docker:ide/java"
         break
       default:
-        data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
+        data.launchConfig.imageUuid = "docker:ide/java"
         break
     }
-    data.launchConfig.dataVolumes = [req.body.userId + ":/home/jovyan"]
-    data.launchConfig.command=["start-notebook.sh", "--NotebookApp.token=''"]
+    data.launchConfig.dataVolumes = ["javaSrc:/srcData"]
 
     request.post({
       url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/service',
@@ -51,12 +53,12 @@ module.exports = {
                     "path": "",
                     "priority": 12,
                     "serviceId": serviceBodyWithoutInstance.id,
-                    "sourcePort": 83,
-                    "targetPort": 8888,
+                    "sourcePort": 84,
+                    "targetPort": 8080,
                   })
 
-                  if (proxyData.launchConfig.ports.indexOf("83:83/tcp") === -1) {
-                    proxyData.launchConfig.ports.push("83:83/tcp")
+                  if (proxyData.launchConfig.ports.indexOf("84:84/tcp") === -1) {
+                    proxyData.launchConfig.ports.push("84:84/tcp")
                   }
 
                   request.put({
@@ -66,7 +68,7 @@ module.exports = {
                     setTimeout(function() {
                       res.send(JSON.stringify({
                         errorCode: 0,
-                        ws: serviceName+".cloudwarehub.com:83",
+                        ws: serviceName+".cloudwarehub.com:84",
                         service_name: serviceName,
                         service_id: serviceBodyWithoutInstance.id,
                         pulsar_id: ''
@@ -84,31 +86,4 @@ module.exports = {
       startService()
     })
   },
-
-  delete: function(req,res,request,lbUrl,serviceUrl) {
-
-    //remove lb rule
-    request.get({url:lbUrl},function(err, httpResponse, body) {
-      var proxyData = JSON.parse(body)
-      for (var i = 0; i < proxyData.lbConfig.portRules.length; i++) {
-        if (proxyData.lbConfig.portRules[i].hostname != null && proxyData.lbConfig.portRules[i].hostname.indexOf(req.body.serviceName) != -1) {
-          proxyData.lbConfig.portRules.splice(i, 1) //删除该规则
-          break
-        }
-      }
-      request.put({
-        url:lbUrl,
-        body: proxyData,
-        json: true},function() {
-        //delete service
-        request.delete({url: serviceUrl + req.body.serviceId},function (err, httpResponse, body) {
-          if(err){
-            res.send(500,{errorCode: 1, errorMessage: 'delete service error.'})
-          }else {
-            res.send(200, {errorCode: 0})
-          }
-        })
-      })
-    })
-  }
 }

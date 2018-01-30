@@ -1,6 +1,6 @@
 module.exports = {
   create: function(data,req,res,request,service,serviceName) {
-    switch (req.body.cloudware_type) {
+    switch (req.body.cloudwareType) {
       case 'python':
         data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v2.0"
         break;
@@ -184,6 +184,7 @@ module.exports = {
       startService()
       })
   },
+
   delete: function(req,res,request,lbUrl,serviceUrl,containerUrl) {
 
     //remove lb rule
