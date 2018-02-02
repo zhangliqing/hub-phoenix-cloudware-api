@@ -1,5 +1,5 @@
 module.exports = {
-  create: function(data,req,res,request,service,serviceName) {
+  create: function(data,req,res,request,service,serviceName,auth) {
     switch (req.body.cloudwareType) {
       case 'jupyter_python':
         data.launchConfig.imageUuid = "docker:jupyter/base-notebook"
@@ -13,6 +13,7 @@ module.exports = {
 
     request.post({
       url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/service',
+      auth:auth,
       json: data
     }, function(err, httpResponse, serviceBodyWithoutInstance) {
       if (err) {
@@ -29,7 +30,8 @@ module.exports = {
         } else {
           setTimeout(function() {
             request.get({
-              url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + serviceBodyWithoutInstance.id
+              url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + serviceBodyWithoutInstance.id,
+              auth:auth,
             }, function(err, httpResponse, serviceBodyWithInstance) {
               var serviceBody = JSON.parse(serviceBodyWithInstance)
               if (serviceBody.type == 'error' || !serviceBody.instanceIds || serviceBody.instanceIds.length == 0) {
@@ -37,7 +39,8 @@ module.exports = {
               }
               else {
                 request.get({
-                  url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid
+                  url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
+                  auth:auth,
                 }, function(err, httpResponse, lbBody) {
 
                   var proxyData = JSON.parse(lbBody)
@@ -61,6 +64,7 @@ module.exports = {
 
                   request.put({
                     url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
+                    auth:auth,
                     json: proxyData
                   }, function(err, httpResponse, body3) {
                     setTimeout(function() {
@@ -85,10 +89,13 @@ module.exports = {
     })
   },
 
-  delete: function(req,res,request,lbUrl,serviceUrl) {
+  delete: function(req,res,request,lbUrl,serviceUrl,auth) {
 
     //remove lb rule
-    request.get({url:lbUrl},function(err, httpResponse, body) {
+    request.get({
+      url:lbUrl,
+      auth:auth,
+    },function(err, httpResponse, body) {
       var proxyData = JSON.parse(body)
       for (var i = 0; i < proxyData.lbConfig.portRules.length; i++) {
         if (proxyData.lbConfig.portRules[i].hostname != null && proxyData.lbConfig.portRules[i].hostname.indexOf(req.body.serviceName) != -1) {
@@ -98,10 +105,14 @@ module.exports = {
       }
       request.put({
         url:lbUrl,
+        auth:auth,
         body: proxyData,
         json: true},function() {
         //delete service
-        request.delete({url: serviceUrl + req.body.serviceId},function (err, httpResponse, body) {
+        request.delete({
+          url: serviceUrl + req.body.serviceId,
+          auth:auth,
+        },function (err, httpResponse, body) {
           if(err){
             res.send(500,{errorCode: 1, errorMessage: 'delete service error.'})
           }else {

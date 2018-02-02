@@ -2,7 +2,7 @@
  * Created by zhangliqing on 2018/1/16.
  */
 module.exports = {
-  create: function(data,req,res,request,service,serviceName) {
+  create: function(data,req,res,request,service,serviceName,auth) {
     switch (req.body.cloudwareType) {
       case 'ide_java':
         data.launchConfig.imageUuid = "docker:ide/java"
@@ -13,16 +13,19 @@ module.exports = {
     }
     data.launchConfig.dataVolumes = ["javaSrc:/srcData"]
 
+    //
     request.post({
       url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/service',
+      auth:auth,
       json: data
     }, function(err, httpResponse, serviceBodyWithoutInstance) {
       if (err) {
-        res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'post to rancher error.'}))
+        res.send(500, JSON.stringify({errorCode: 1, errorMessage: 'create service on rancher error'}))
         return
       }
       console.log('create service successfully')
 
+      //
       var i = 0
       var startService = function() {
         if (i > 10) {
@@ -31,7 +34,8 @@ module.exports = {
         } else {
           setTimeout(function() {
             request.get({
-              url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + serviceBodyWithoutInstance.id
+              url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + serviceBodyWithoutInstance.id,
+              auth:auth,
             }, function(err, httpResponse, serviceBodyWithInstance) {
               var serviceBody = JSON.parse(serviceBodyWithInstance)
               if (serviceBody.type == 'error' || !serviceBody.instanceIds || serviceBody.instanceIds.length == 0) {
@@ -39,7 +43,8 @@ module.exports = {
               }
               else {
                 request.get({
-                  url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid
+                  url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
+                  auth:auth,
                 }, function(err, httpResponse, lbBody) {
 
                   var proxyData = JSON.parse(lbBody)
@@ -63,6 +68,7 @@ module.exports = {
 
                   request.put({
                     url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
+                    auth:auth,
                     json: proxyData
                   }, function(err, httpResponse, body3) {
                     setTimeout(function() {

@@ -24,6 +24,10 @@ var verifyToken = function (req, res, next) {
   }
   next();
 }
+var auth = {
+  user:service.rancher.username,
+  pass:service.rancher.password
+}
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
@@ -260,11 +264,11 @@ router.route('/services').post(function (req, res) {
 
   if(req.body.cloudwareType !== undefined){
     if(req.body.cloudwareType.indexOf('jupyter') !== -1){
-      jupyter.create(data,req,res,request,service,serviceName)
+      jupyter.create(data,req,res,request,service,serviceName,auth)
     }else if(req.body.cloudwareType.indexOf('ide') !== -1){
-      ide.create(data,req,res,request,service,serviceName)
+      ide.create(data,req,res,request,service,serviceName,auth)
     }else {
-      cloudware.create(data,req,res,request,service,serviceName)
+      cloudware.create(data,req,res,request,service,serviceName,auth)
     }
   }else {
     res.send(500,{errorCode: 1, errorMessage: 'no cloudware type'})
@@ -281,9 +285,9 @@ router.route('/homeworks').post(function (req, res) {
   containerUrl = service.rancher.endpoint + '/projects/'+service.rancher.env+'/containers/'
 
   if(req.body.pulsarId){
-    cloudware.delete(req,res,request,lbUrl,serviceUrl,containerUrl)
+    cloudware.delete(req,res,request,lbUrl,serviceUrl,containerUrl,auth)
   }else { //jupyter与ide相同
-    jupyter.delete(req,res,request,lbUrl,serviceUrl)
+    jupyter.delete(req,res,request,lbUrl,serviceUrl,auth)
   }
 })
 

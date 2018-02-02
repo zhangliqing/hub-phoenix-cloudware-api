@@ -1,5 +1,5 @@
 module.exports = {
-  create: function(data,req,res,request,service,serviceName) {
+  create: function(data,req,res,request,service,serviceName,auth) {
     switch (req.body.cloudwareType) {
       case 'python':
         data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v2.0"
@@ -21,6 +21,7 @@ module.exports = {
 
     request.post({
       url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/service',
+      auth:auth,
       json: data
     }, function (err, httpResponse, serviceWithoutInstance) {
       if (err) {
@@ -37,7 +38,8 @@ module.exports = {
           } else {
             setTimeout(function() {
               request.get({
-                url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + serviceWithoutInstance.id
+                url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/services/' + serviceWithoutInstance.id,
+                auth:auth,
               }, function(err, httpResponse, serviceWithInstance) {
                 var serviceBody = JSON.parse(serviceWithInstance)
                 if (serviceBody.type == 'error' || !serviceBody.instanceIds || serviceBody.instanceIds.length == 0) {
@@ -45,7 +47,10 @@ module.exports = {
                 }
                 else {
                   var xfce4Id = serviceBody.instanceIds[0] //获得服务对应容器的id
-                  request.get({url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/containers/' + xfce4Id}, function(err, httpResponse, xfce4Body) {
+                  request.get({
+                    url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/containers/' + xfce4Id,
+                    auth:auth
+                  }, function(err, httpResponse, xfce4Body) {
                     var parsedContainer = JSON.parse(xfce4Body)
                     var hostId = parsedContainer.hostId
                     var data = {
@@ -134,13 +139,15 @@ module.exports = {
                     //创建pulsar容器
                     request.post({
                       url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/container',
+                      auth:auth,
                       json: data
                     }, function(err, httpResponse, pulsarBody) {
                       var pulsarId = pulsarBody.id
                       console.log('create pulsar successfully')
 
                       request.get({
-                        url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid
+                        url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
+                        auth:auth
                       }, function(err, httpResponse, lbBody) {
                         var proxyData = JSON.parse(lbBody)
                         proxyData.lbConfig.portRules.push({
@@ -158,6 +165,7 @@ module.exports = {
 
                         request.put({
                           url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
+                          auth:auth,
                           json: proxyData
                         }, function(err, httpResponse, body3) {
 
@@ -185,10 +193,13 @@ module.exports = {
       })
   },
 
-  delete: function(req,res,request,lbUrl,serviceUrl,containerUrl) {
+  delete: function(req,res,request,lbUrl,serviceUrl,containerUrl,auth) {
 
     //remove lb rule
-    request.get({url:lbUrl},function(err, httpResponse, body) {
+    request.get({
+      url:lbUrl,
+      auth:auth
+    },function(err, httpResponse, body) {
       var proxyData = JSON.parse(body)
       for (var i = 0; i < proxyData.lbConfig.portRules.length; i++) {
         if (proxyData.lbConfig.portRules[i].path != null && proxyData.lbConfig.portRules[i].path.indexOf(req.body.serviceName) != -1) {
@@ -198,14 +209,21 @@ module.exports = {
       }
       request.put({
         url:lbUrl,
+        auth:auth,
         body: proxyData,
         json: true},function() {
         //delete service and pulsar
-        request.delete({url: serviceUrl + req.body.serviceId},function (err, httpResponse, body) {
+        request.delete({
+          url: serviceUrl + req.body.serviceId,
+          auth:auth
+        },function (err, httpResponse, body) {
           if(err){
             res.send(500,{errorCode: 1, errorMessage: 'delete service error.'})
           }else {
-            request.delete({url: containerUrl + req.body.pulsarId},function(err, httpResponse, body) {
+            request.delete({
+              url: containerUrl + req.body.pulsarId,
+              auth:auth
+            },function(err, httpResponse, body) {
               if(err){
                 res.send(500,{errorCode: 1, errorMessage: 'delete pulsar error.'})
               }else {
@@ -216,8 +234,5 @@ module.exports = {
         })
       })
     })
-
-
-
   }
 }
