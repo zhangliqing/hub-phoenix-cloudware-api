@@ -1,6 +1,6 @@
 module.exports = {
-  create: function(data,req,res,request,service,serviceName,auth) {
-    switch (req.body.cloudwareType) {
+  create: function(data,cloudwareType,userId,res,request,service,serviceName,auth) {
+    switch (cloudwareType) {
       case 'jupyter_python':
         data.launchConfig.imageUuid = "docker:jupyter/base-notebook"
         break
@@ -8,7 +8,7 @@ module.exports = {
         data.launchConfig.imageUuid = "docker:cloudwarelabs/base:v2.0"
         break
     }
-    data.launchConfig.dataVolumes = [req.body.userId + ":/home/jovyan"]
+    data.launchConfig.dataVolumes = [userId + ":/home/jovyan"]
     data.launchConfig.command=["start-notebook.sh", "--NotebookApp.token=''"]
 
     request.post({

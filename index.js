@@ -39,10 +39,13 @@ router.use(verifyToken);
 //req.body userId
 router.route('/volumes').post(function (req, res) {
   console.log('recive post to /volumes')
+
+  var userId = req.body.userId || req.body.user_id;
+
   var data = {
     "type": "volume",
     "driver": "rancher-nfs",
-    "name": req.body.userId,
+    "name": userId,
     "driverOpts": {}
   }
   var openContainer = function (userId) {
@@ -137,7 +140,7 @@ router.route('/volumes').post(function (req, res) {
 
   rp({method: 'POST', uri: 'http://117.50.1.134:8080/v2-beta/projects/1a3504/volume', body: data, json: true})
     .then(function () {
-      openContainer(req.body.userId)
+      openContainer(userId)
       console.log('create volume success')
       res.send(201, {errorCode: 0})
     })
@@ -152,6 +155,10 @@ router.route('/volumes').post(function (req, res) {
 //res: ws serviceName serviceId pulsarId
 router.route('/services').post(function (req, res) {
   console.log('recive post to /service')
+
+  var cloudwareType = req.body.cloudwareType || req.body.cloudware_type;
+  var userId = req.body.userId || req.body.user_id
+
   var serviceName = shortid.generate()
   serviceName = serviceName.replace('_', 'aa')
   serviceName = serviceName.replace('-', 'bb')
@@ -182,7 +189,7 @@ router.route('/services').post(function (req, res) {
       },
       "restartPolicy": {"name": "always"},
       "secrets": [],
-      "dataVolumes": [req.body.userId + ":/root/Desktop/myFile"],
+      "dataVolumes": [userId + ":/root/Desktop/myFile"],
       "dataVolumesFrom": [],
       "dns": [],
       "dnsSearch": [],
@@ -262,13 +269,13 @@ router.route('/services').post(function (req, res) {
     "fqdn": null
   };
 
-  if(req.body.cloudwareType !== undefined){
-    if(req.body.cloudwareType.indexOf('jupyter') !== -1){
-      jupyter.create(data,req,res,request,service,serviceName,auth)
-    }else if(req.body.cloudwareType.indexOf('ide') !== -1){
-      ide.create(data,req,res,request,service,serviceName,auth)
+  if(cloudwareType !== undefined){
+    if(cloudwareType.indexOf('jupyter') !== -1){
+      jupyter.create(data,cloudwareType,userId,res,request,service,serviceName,auth)
+    }else if(cloudwareType.indexOf('ide') !== -1){
+      ide.create(data,cloudwareType,res,request,service,serviceName,auth)
     }else {
-      cloudware.create(data,req,res,request,service,serviceName,auth)
+      cloudware.create(data,cloudwareType,res,request,service,serviceName,auth)
     }
   }else {
     res.send(500,{errorCode: 1, errorMessage: 'no cloudware type'})

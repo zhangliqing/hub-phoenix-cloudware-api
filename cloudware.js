@@ -1,6 +1,6 @@
 module.exports = {
-  create: function(data,req,res,request,service,serviceName,auth) {
-    switch (req.body.cloudwareType) {
+  create: function(data,cloudwareType,res,request,service,serviceName,auth) {
+    switch (cloudwareType) {
       case 'python':
         data.launchConfig.imageUuid = "docker:cloudwarelabs/python:v2.0"
         break;

@@ -2,8 +2,8 @@
  * Created by zhangliqing on 2018/1/16.
  */
 module.exports = {
-  create: function(data,req,res,request,service,serviceName,auth) {
-    switch (req.body.cloudwareType) {
+  create: function(data,cloudwareType,res,request,service,serviceName,auth) {
+    switch (cloudwareType) {
       case 'ide_java':
         data.launchConfig.imageUuid = "docker:ide/java"
         break
