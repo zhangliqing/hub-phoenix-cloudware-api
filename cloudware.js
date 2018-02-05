@@ -163,6 +163,10 @@ module.exports = {
                           "targetPort": 5678
                         })
 
+                        if (proxyData.launchConfig.ports.indexOf("8888:8888/tcp") === -1) {
+                          proxyData.launchConfig.ports.push("8888:8888/tcp")
+                        }
+
                         request.put({
                           url: service.rancher.endpoint + '/projects/' + service.rancher.env + '/loadbalancerservices/' + service.rancher.lbid,
                           auth:auth,

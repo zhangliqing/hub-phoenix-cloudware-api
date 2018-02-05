@@ -283,7 +283,7 @@ router.route('/services').post(function (req, res) {
 })
 
 //删除云件
-//req.body: serviceName serviceId  pulsarId(可选)
+//req.body: serviceName serviceId  pulsarIds(可选)
 router.route('/homeworks').post(function (req, res) {
   console.log('recive post to /homeworks')
 
