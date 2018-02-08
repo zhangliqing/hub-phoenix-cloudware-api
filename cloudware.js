@@ -207,6 +207,10 @@ module.exports = {
       var proxyData = JSON.parse(body)
       for (var i = 0; i < proxyData.lbConfig.portRules.length; i++) {
         if (proxyData.lbConfig.portRules[i].path != null && proxyData.lbConfig.portRules[i].path.indexOf(req.body.serviceName) != -1) {
+          if(proxyData.lbConfig.portRules[i].port != '8888'){
+            console.log(req.body.serviceName+' call delete')
+            break
+          }
           proxyData.lbConfig.portRules.splice(i, 1) //删除该规则
           break
         }
