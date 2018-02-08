@@ -285,17 +285,17 @@ router.route('/services').post(function (req, res) {
 //删除云件
 //req.body: serviceName serviceId  pulsarIds(可选)
 router.route('/homeworks').post(function (req, res) {
-  console.log('recive post to /homeworks')
-  console.log('req.body.pulsarId: ' + req.body.pulsarId)
+  console.log('recive post to /homeworks,req.body.pulsarId is '+req.body.pulsarId)
+
   lbUrl = service.rancher.endpoint + '/projects/'+service.rancher.env+'/loadbalancerservices/'+service.rancher.lbid;
   serviceUrl = service.rancher.endpoint + '/projects/'+service.rancher.env+'/services/'
   containerUrl = service.rancher.endpoint + '/projects/'+service.rancher.env+'/containers/'
 
   if(req.body.pulsarId){
-    console.log('call delete cloudware')
+    console.log('now delete cloudware')
     cloudware.delete(req,res,request,lbUrl,serviceUrl,containerUrl,auth)
   }else { //jupyter与ide相同
-    console.log('call delete jupyter or ide')
+    console.log('now delete jupyter or ide')
     jupyter.delete(req,res,request,lbUrl,serviceUrl,auth)
   }
 })

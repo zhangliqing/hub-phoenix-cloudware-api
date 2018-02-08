@@ -101,7 +101,7 @@ module.exports = {
         if (proxyData.lbConfig.portRules[i].hostname != null && proxyData.lbConfig.portRules[i].hostname.indexOf(req.body.serviceName) != -1) {
           console.log('delete '+ proxyData.lbConfig.portRules[i].hostname)
           if(proxyData.lbConfig.portRules[i].hostname == 'api.cloudwarehub.com'){
-            console.log(req.body.serviceName+' call delete')
+            console.log('error: ' + req.body.serviceName+' call delete!!!')
             break
           }
           proxyData.lbConfig.portRules.splice(i, 1) //删除该规则
